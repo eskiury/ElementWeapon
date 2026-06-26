@@ -1,0 +1,22 @@
+{
+	"FileVersion": 3,
+	"EngineAssociation": "{955A5291-4725-12E7-F4A8-8E90A8EDD4BC}",
+	"Category": "",
+	"Description": "",
+	"Modules": [
+		{
+			"Name": "ElementWeapon",
+			"Type": "Runtime",
+			"LoadingPhase": "Default"
+		}
+	],
+	"Plugins": [
+		{
+			"Name": "ModelingToolsEditorMode",
+			"Enabled": true,
+			"TargetAllowList": [
+				"Editor"
+			]
+		}
+	]
+}
