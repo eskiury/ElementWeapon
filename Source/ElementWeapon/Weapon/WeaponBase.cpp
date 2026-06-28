@@ -1,0 +1,92 @@
+#include "WeaponBase.h"
+
+#include"Components/WeaponTriggerComponent.h"
+#include"Components/WeaponBarrelComponent.h"
+#include"Components/WeaponMuzzleComponent.h"
+
+// Sets default values
+AWeaponBase::AWeaponBase()
+{
+ 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
+	PrimaryActorTick.bCanEverTick = true;
+
+}
+
+void AWeaponBase::EquipComponent(EWeaponSlot Slot, TSubclassOf<UActorComponent> NewComponentClass)
+{
+	//Destrucción limpia del componente que ya existía en ese slot
+	switch (Slot)
+	{
+	case EWeaponSlot::Trigger:
+		if (CurrentTrigger != nullptr)
+		{
+			CurrentTrigger->UnregisterComponent();
+			CurrentTrigger->DestroyComponent();
+			CurrentTrigger = nullptr;
+		}
+		break;
+	case EWeaponSlot::Barrel:
+		if (CurrentBarrel != nullptr)
+		{
+			CurrentBarrel->UnregisterComponent();
+			CurrentBarrel->DestroyComponent();
+			CurrentBarrel = nullptr;
+		}
+		break;
+	case EWeaponSlot::Muzzle:
+		if (CurrentMuzzle != nullptr)
+		{
+			CurrentMuzzle->UnregisterComponent();
+			CurrentMuzzle->DestroyComponent();
+			CurrentMuzzle = nullptr;
+		}
+		break;
+	}
+
+	//Si la clase que nos pasan es nula, queríamos vaciar el slot. 
+	//Como ya lo hemos limpiado arriba, salimos de la función inmediatamente.
+	if (NewComponentClass == nullptr)
+	{
+		return;
+	}
+
+	//Instanciación genérica en memoria (Ocurre para cualquier slot)
+	UActorComponent* NewComp = NewObject<UActorComponent>(this, NewComponentClass);
+	if (NewComp == nullptr) return;
+
+	//Asignación del nuevo componente a su puntero específico (Casting)
+	switch (Slot)
+	{
+	case EWeaponSlot::Trigger:
+		CurrentTrigger = Cast<UWeaponTriggerComponent>(NewComp);
+		break;
+	case EWeaponSlot::Barrel:
+		CurrentBarrel = Cast<UWeaponBarrelComponent>(NewComp);
+		break;
+	case EWeaponSlot::Muzzle:
+		CurrentMuzzle = Cast<UWeaponMuzzleComponent>(NewComp);
+		break;
+	}
+
+	//Registro global del componente y inicialización del contrato (Interfaz)
+	NewComp->RegisterComponent();
+
+	IWeaponComponentInterface* InterfaceContext = Cast<IWeaponComponentInterface>(NewComp);
+	if (InterfaceContext != nullptr)
+	{
+		InterfaceContext->InitializeComponentContext(this);
+	}
+}
+
+void AWeaponBase::BeginPlay()
+{
+	Super::BeginPlay();	//Se necesita porque heredamos de la clase AActor que precisa su constructor base, o nos jodemos.
+
+	//Inyectamos las clases por defecto
+	EquipComponent(EWeaponSlot::Trigger, DefaultTriggerClass);
+	EquipComponent(EWeaponSlot::Barrel, DefaultBarrelClass);
+	EquipComponent(EWeaponSlot::Muzzle, DefaultMuzzleClass);
+
+}
+
+
