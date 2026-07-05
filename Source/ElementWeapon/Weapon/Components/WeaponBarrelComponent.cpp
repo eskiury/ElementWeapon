@@ -1,6 +1,8 @@
 #include "WeaponBarrelComponent.h"
 
 #include "../../Elemental/ElementalDataAsset.h"
+#include "../../Weapon/WeaponProjectile.h"
+#include "../WeaponBase.h"
 
 UWeaponBarrelComponent::UWeaponBarrelComponent()
 {
@@ -8,6 +10,7 @@ UWeaponBarrelComponent::UWeaponBarrelComponent()
 
 	//Configuracion del Spawner de balas
 	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+	SpawnParams.Owner = GetOwner();
 
 }
 
@@ -27,7 +30,24 @@ void UWeaponBarrelComponent::FireProjectile()
 			InfusedElement->BarrelAction->ExecuteBarrelModifier(this);
 		}
 	}
+}
 
-	FTransform Transform = GetOwner()->GetActorTransform();
-	GetWorld()->SpawnActor<AActor>(ProjectileClass, Transform, SpawnParams);
+void UWeaponBarrelComponent::SpawnSingleActor(FVector Location, FRotator Rotation) const
+{
+	if (ProjectileClass == nullptr) return;
+
+	//Spawneamos al actor (Projectile) en la posicion del arma sin colisionar unas con otras y con la rotacion alterada por el Modifier
+	AWeaponProjectile* SpawnedActor = GetWorld()->SpawnActor<AWeaponProjectile>(ProjectileClass, Location, Rotation, SpawnParams);
+
+	if (SpawnedActor)
+	{
+		// ¡Éxito! El actor se ha spawneado correctamente.
+		MyWeaponOwner->ShotMuzzle(SpawnedActor);
+	}
+	else
+	{
+		// El spawn ha fallado
+		UE_LOG(LogTemp, Warning, TEXT("Error: No se pudo spawnear el Actor."));
+	}
+
 }

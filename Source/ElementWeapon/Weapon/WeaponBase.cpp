@@ -4,6 +4,9 @@
 #include"Components/WeaponBarrelComponent.h"
 #include"Components/WeaponMuzzleComponent.h"
 
+#include "WeaponProjectile.h"
+#include "../Elemental/ElementalDataAsset.h"
+
 // Sets default values
 AWeaponBase::AWeaponBase()
 {
@@ -88,12 +91,29 @@ void AWeaponBase::BeginPlay()
 	EquipComponent(EWeaponSlot::Muzzle, DefaultMuzzleClass);
 }
 
-void AWeaponBase::ShotBarrel()
+void AWeaponBase::ShotBarrel() const
 {
 	if (CurrentBarrel != nullptr)
 	{
 		CurrentBarrel->FireProjectile();
 	}
+}
+
+void AWeaponBase::ShotMuzzle(AWeaponProjectile* Projectile) const
+{
+	if (Projectile == nullptr || CurrentMuzzle == nullptr) return;
+
+	UElementalDataAsset* MuzzleElement = CurrentMuzzle->GetInfusedElement();
+
+	if (MuzzleElement != nullptr)
+	{
+		// Inyectamos la acción lógica de impacto (Ej: Crear charco de veneno)
+		Projectile->MuzzleAction = MuzzleElement->MuzzleAction;
+
+		// Inyectamos el Data Asset completo para efectos visuales o tipo de daño
+		Projectile->ElementalData = MuzzleElement;
+	}
+
 }
 
 

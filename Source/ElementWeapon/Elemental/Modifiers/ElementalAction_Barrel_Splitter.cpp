@@ -4,11 +4,16 @@
 
 void UElementalAction_Barrel_Splitter::ExecuteBarrelModifier(UWeaponBarrelComponent* BarrelComponent) const
 {
-	//for (int i = 0; i < ProjectileCount; i++)
-	//{
-		//BarrelComponent->GetOwner()->GetActorRotation();
-		//FQuat Rotacion;
-		//Rotacion.Y = RandRange
-		//BarrelComponent->GetOwner()->SetActorRotation();
-	//}
+	if (BarrelComponent == nullptr || BarrelComponent->GetOwner() == nullptr) return;
+
+	FVector Location = BarrelComponent->GetOwner()->GetActorLocation();
+	FRotator Rotacion = BarrelComponent->GetOwner()->GetActorRotation();
+
+	//Enviamos el comando de Spawnear al WeaponBarrelComponent con la rotacion alterada y un numero X de veces.
+	for (int i = 0; i < ProjectileCount; i++)
+	{			
+		//Rotacion + FRotator(FMath::RandRange(-SpreadAngle, SpreadAngle), FMath::RandRange(-SpreadAngle, SpreadAngle), 0.0f)
+		//Suma del Rotator Main, mas los dos Randoms, pero ahorramos memoria que esto se repite mucho.
+		BarrelComponent->SpawnSingleActor(Location, Rotacion + FRotator(FMath::RandRange(-SpreadAngle, SpreadAngle), FMath::RandRange(-SpreadAngle, SpreadAngle), 0.0f));
+	}
 }

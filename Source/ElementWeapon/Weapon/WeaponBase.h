@@ -38,7 +38,9 @@ public:
 	//Getter de la punta
 	FORCEINLINE class UWeaponMuzzleComponent* GetCurrentMuzzle() const { return CurrentMuzzle; }
 
-	void ShotBarrel();
+	//Funciones parra modificar con cada componente del arma
+	void ShotBarrel() const;
+	void ShotMuzzle(class AWeaponProjectile* Projectile) const;
 
 
 private:

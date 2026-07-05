@@ -12,7 +12,7 @@ class ELEMENTWEAPON_API UWeaponBarrelComponent : public UActorComponent, public 
 	GENERATED_BODY()
 
 	FActorSpawnParameters SpawnParams;
-	
+
 
 public:	
 	// Sets default values for this component's properties
@@ -21,6 +21,8 @@ public:
 	virtual void InitializeComponentContext(class AWeaponBase* Weapon) override;
 
 	void FireProjectile();
+
+	void SpawnSingleActor(FVector Location, FRotator Rotation) const;
 
 protected:
 	UPROPERTY(BlueprintReadOnly, Category = "Weapon Context")
