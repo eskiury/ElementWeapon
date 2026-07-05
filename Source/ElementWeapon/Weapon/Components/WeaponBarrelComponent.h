@@ -11,11 +11,16 @@ class ELEMENTWEAPON_API UWeaponBarrelComponent : public UActorComponent, public 
 {
 	GENERATED_BODY()
 
+	FActorSpawnParameters SpawnParams;
+	
+
 public:	
 	// Sets default values for this component's properties
 	UWeaponBarrelComponent();
 
 	virtual void InitializeComponentContext(class AWeaponBase* Weapon) override;
+
+	void FireProjectile();
 
 protected:
 	UPROPERTY(BlueprintReadOnly, Category = "Weapon Context")
@@ -23,5 +28,8 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Elemental Infusion")
 	class UElementalDataAsset* InfusedElement;
+
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<AActor> ProjectileClass;
 	
 };

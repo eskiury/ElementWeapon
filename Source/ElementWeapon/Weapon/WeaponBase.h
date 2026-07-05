@@ -32,6 +32,15 @@ public:
 
 	void EquipComponent(EWeaponSlot Slot, TSubclassOf<UActorComponent> NewComponentClass);
 
+	//Getter del cañon
+	FORCEINLINE class UWeaponBarrelComponent* GetCurrentBarrel() const { return CurrentBarrel; }
+
+	//Getter de la punta
+	FORCEINLINE class UWeaponMuzzleComponent* GetCurrentMuzzle() const { return CurrentMuzzle; }
+
+	void ShotBarrel();
+
+
 private:
 	void BeginPlay();
 
@@ -53,4 +62,5 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, Category = "WeaponSetup")
 	TSubclassOf<class UWeaponMuzzleComponent> DefaultMuzzleClass;
+
 };

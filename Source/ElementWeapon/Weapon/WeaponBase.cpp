@@ -86,7 +86,14 @@ void AWeaponBase::BeginPlay()
 	EquipComponent(EWeaponSlot::Trigger, DefaultTriggerClass);
 	EquipComponent(EWeaponSlot::Barrel, DefaultBarrelClass);
 	EquipComponent(EWeaponSlot::Muzzle, DefaultMuzzleClass);
+}
 
+void AWeaponBase::ShotBarrel()
+{
+	if (CurrentBarrel != nullptr)
+	{
+		CurrentBarrel->FireProjectile();
+	}
 }
 
 

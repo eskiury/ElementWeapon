@@ -11,10 +11,16 @@ class ELEMENTWEAPON_API UWeaponTriggerComponent : public UActorComponent, public
 {
 	GENERATED_BODY()
 
+	FTimerHandle StreamTimerHandle;
+
 public:	
 	UWeaponTriggerComponent();
 
 	virtual void InitializeComponentContext(class AWeaponBase* Weapon) override;
+
+	void PullTrigger();
+
+	void ReleaseTrigger();
 
 protected:
 	//Guardamos la referencia de arma para usarla cuando este componente dispare
@@ -23,5 +29,10 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Elemental Infusion")
 	class UElementalDataAsset* InfusedElement;
+
+	UPROPERTY(EditAnywhere, Category = "Weapon Stats")
+	float FireRate = 0.1f;
+
+	void FireShot();
 
 };
