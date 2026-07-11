@@ -21,21 +21,30 @@ void UWeaponBarrelComponent::InitializeComponentContext(AWeaponBase* Weapon)
 
 void UWeaponBarrelComponent::FireProjectile()
 {
-	//Check elemento seleccionado
-	if (InfusedElement != nullptr)
+	//¿Tenemos elemento y acción geométrica en el cañón?
+	if (InfusedElement != nullptr && InfusedElement->BarrelAction != nullptr)
 	{
-		//Check elemento tiene accion especifica
-		if (InfusedElement->BarrelAction != nullptr)
-		{
-			InfusedElement->BarrelAction->ExecuteBarrelModifier(this);
-		}
+		//SÍ: Le cedemos el control al Splitter (él se encargará de llamar a SpawnSingleActor)
+		InfusedElement->BarrelAction->ExecuteBarrelModifier(this);
+		UE_LOG(LogTemp, Log, TEXT("Splitter"));
+
+	}
+	else
+	{
+		//NO: Disparo limpio por defecto (Una sola bala recta)
+		//Calculamos la posición y rotación actual del arma para el disparo estándar
+		FVector SpawnLocation = GetOwner()->GetActorLocation();
+		FRotator SpawnRotation = GetOwner()->GetActorRotation();
+
+		//Llamamos a tu spawner físico para lanzar la bala única
+		SpawnSingleActor(SpawnLocation, SpawnRotation);
+		UE_LOG(LogTemp, Log, TEXT("Spawn Projectile	"));
+
 	}
 }
-
 void UWeaponBarrelComponent::SpawnSingleActor(FVector Location, FRotator Rotation) const
 {
 	if (ProjectileClass == nullptr) return;
-
 	//Spawneamos al actor (Projectile) en la posicion del arma sin colisionar unas con otras y con la rotacion alterada por el Modifier
 	AWeaponProjectile* SpawnedActor = GetWorld()->SpawnActor<AWeaponProjectile>(ProjectileClass, Location, Rotation, SpawnParams);
 

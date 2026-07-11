@@ -89,6 +89,12 @@ void AWeaponBase::BeginPlay()
 	EquipComponent(EWeaponSlot::Trigger, DefaultTriggerClass);
 	EquipComponent(EWeaponSlot::Barrel, DefaultBarrelClass);
 	EquipComponent(EWeaponSlot::Muzzle, DefaultMuzzleClass);
+
+	if (CurrentTrigger != nullptr)
+	{
+		CurrentTrigger->PullTrigger();
+
+	}
 }
 
 void AWeaponBase::ShotBarrel() const
@@ -112,6 +118,15 @@ void AWeaponBase::ShotMuzzle(AWeaponProjectile* Projectile) const
 
 		// Inyectamos el Data Asset completo para efectos visuales o tipo de daño
 		Projectile->ElementalData = MuzzleElement;
+
+
+		// ─── LOG DE PRUEBA TEMPORAL ───
+		// %s espera un texto. Usar *Objeto->GetName() nos da el nombre del archivo en Unreal
+		UE_LOG(LogTemp, Log, TEXT("¡PROYECTIL CARGADO! Se ha inyectado el elemento: %s"), *MuzzleElement->GetName());
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Disparo Neutro: La Punta actual no tiene ningun elemento infusionado."));
 	}
 
 }
