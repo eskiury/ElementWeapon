@@ -15,5 +15,8 @@ class ELEMENTWEAPON_API UElementalAction_Muzzle : public UObject
 
 public:
 	// El contrato que ejecutará el Gatillo cuando el jugador dispare
-	virtual void ExecuteMuzzleModifier(class UWeaponMuzzleComponent* MuzzleComponent) const{}
+	virtual bool ExecuteMuzzleModifier(class AWeaponProjectile* ProjectileContext, const FHitResult& HitResult) const
+	{
+		return true;
+	}
 };

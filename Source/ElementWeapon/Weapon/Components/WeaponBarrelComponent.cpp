@@ -26,7 +26,7 @@ void UWeaponBarrelComponent::FireProjectile()
 	{
 		//SÍ: Le cedemos el control al Splitter (él se encargará de llamar a SpawnSingleActor)
 		InfusedElement->BarrelAction->ExecuteBarrelModifier(this);
-		UE_LOG(LogTemp, Log, TEXT("Splitter"));
+		//UE_LOG(LogTemp, Log, TEXT("Splitter"));
 
 	}
 	else
@@ -38,7 +38,7 @@ void UWeaponBarrelComponent::FireProjectile()
 
 		//Llamamos a tu spawner físico para lanzar la bala única
 		SpawnSingleActor(SpawnLocation, SpawnRotation);
-		UE_LOG(LogTemp, Log, TEXT("Spawn Projectile	"));
+		//UE_LOG(LogTemp, Log, TEXT("Spawn Projectile	"));
 
 	}
 }

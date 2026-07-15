@@ -122,7 +122,7 @@ void AWeaponBase::ShotMuzzle(AWeaponProjectile* Projectile) const
 
 		// ─── LOG DE PRUEBA TEMPORAL ───
 		// %s espera un texto. Usar *Objeto->GetName() nos da el nombre del archivo en Unreal
-		UE_LOG(LogTemp, Log, TEXT("¡PROYECTIL CARGADO! Se ha inyectado el elemento: %s"), *MuzzleElement->GetName());
+		//UE_LOG(LogTemp, Log, TEXT("¡PROYECTIL CARGADO! Se ha inyectado el elemento: %s"), *MuzzleElement->GetName());
 	}
 	else
 	{
