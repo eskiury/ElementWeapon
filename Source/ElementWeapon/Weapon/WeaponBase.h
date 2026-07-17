@@ -32,6 +32,13 @@ public:
 
 	void EquipComponent(EWeaponSlot Slot, TSubclassOf<UActorComponent> NewComponentClass);
 
+	UFUNCTION(BlueprintCallable, Category = "Weapon Actions")
+	void ShotWeapon();
+
+	UFUNCTION(BlueprintCallable, Category = "Weapon Actions")
+	void StopShooting();
+
+
 	//Getter del cañon
 	FORCEINLINE class UWeaponBarrelComponent* GetCurrentBarrel() const { return CurrentBarrel; }
 

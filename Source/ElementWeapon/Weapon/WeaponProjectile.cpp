@@ -25,7 +25,7 @@ AWeaponProjectile::AWeaponProjectile()
 	ProjectileMovement = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("ProjectileMovement"));
 
 	//Cosas para probar
-	ProjectileMovement->InitialSpeed = 500.0f;
+	ProjectileMovement->InitialSpeed = 1000.0f;
 }
 
 void AWeaponProjectile::NotifyHit(
@@ -63,8 +63,6 @@ void AWeaponProjectile::NotifyHit(
 			return;
 		}
 	}
-	//UE_LOG(LogTemp, Log, TEXT("Colision"));
-	//return;
 }
 
 

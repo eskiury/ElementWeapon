@@ -11,7 +11,7 @@ class ELEMENTWEAPON_API UWeaponTriggerComponent : public UActorComponent, public
 {
 	GENERATED_BODY()
 
-	FTimerHandle StreamTimerHandle;
+	bool bHasFiredThisPull = false;
 
 public:	
 	UWeaponTriggerComponent();
@@ -21,6 +21,9 @@ public:
 	void PullTrigger();
 
 	void ReleaseTrigger();
+
+	void FireShot();
+	FTimerHandle StreamTimerHandle;
 
 protected:
 	//Guardamos la referencia de arma para usarla cuando este componente dispare
@@ -33,6 +36,6 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Weapon Stats")
 	float FireRate = 0.1f;
 
-	void FireShot();
+	
 
 };

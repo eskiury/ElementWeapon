@@ -1,6 +1,7 @@
 #include "WeaponTriggerComponent.h"
 
 #include "../WeaponBase.h"
+#include "../../Elemental/ElementalDataAsset.h"
 
 UWeaponTriggerComponent::UWeaponTriggerComponent()
 {
@@ -15,15 +16,26 @@ void UWeaponTriggerComponent::InitializeComponentContext(AWeaponBase* Weapon)
 
 void UWeaponTriggerComponent::PullTrigger()
 {
-	if(!GetWorld()->GetTimerManager().IsTimerActive(StreamTimerHandle))
+	if (InfusedElement != nullptr && InfusedElement->TriggerAction != nullptr)
 	{
-		GetWorld()->GetTimerManager().SetTimer(StreamTimerHandle, this, &UWeaponTriggerComponent::FireShot, FireRate, true, -1.0f);
+		InfusedElement->TriggerAction->ExecuteTriggerModifier(this);
+	}
+	else
+	{
+		if (!bHasFiredThisPull)
+		{
+			FireShot();
+			bHasFiredThisPull = true;
+		}
+
 	}
 }
 
 void UWeaponTriggerComponent::ReleaseTrigger()
 {
 	GetWorld()->GetTimerManager().ClearTimer(StreamTimerHandle);
+
+	bHasFiredThisPull = false;
 }
 
 void UWeaponTriggerComponent::FireShot()

@@ -81,6 +81,24 @@ void AWeaponBase::EquipComponent(EWeaponSlot Slot, TSubclassOf<UActorComponent> 
 	}
 }
 
+void AWeaponBase::ShotWeapon()
+{
+	if (CurrentTrigger != nullptr)
+	{
+		CurrentTrigger->PullTrigger();
+	}
+}
+
+void AWeaponBase::StopShooting()
+{
+	if (CurrentTrigger != nullptr)
+	{
+		CurrentTrigger->ReleaseTrigger();
+	}
+}
+
+
+
 void AWeaponBase::BeginPlay()
 {
 	Super::BeginPlay();	//Se necesita porque heredamos de la clase AActor que precisa su constructor base, o nos jodemos.
@@ -90,11 +108,7 @@ void AWeaponBase::BeginPlay()
 	EquipComponent(EWeaponSlot::Barrel, DefaultBarrelClass);
 	EquipComponent(EWeaponSlot::Muzzle, DefaultMuzzleClass);
 
-	if (CurrentTrigger != nullptr)
-	{
-		CurrentTrigger->PullTrigger();
 
-	}
 }
 
 void AWeaponBase::ShotBarrel() const
