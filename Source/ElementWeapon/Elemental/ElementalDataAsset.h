@@ -6,9 +6,9 @@
 #include "ElementalAction.h"
 
 //Preciso de este include para poder ejecutar la accion desde WeaponBarrelComponent
-#include "ElementalAction_Barrel.h"
-#include "ElementalAction_Trigger.h"
-#include "ElementalAction_Muzzle.h"
+#include "Modifiers/ElementalAction_Barrel.h"
+#include "Modifiers/ElementalAction_Trigger.h"
+#include "Modifiers/ElementalAction_Muzzle.h"
 
 #include "ElementalDataAsset.generated.h"
 

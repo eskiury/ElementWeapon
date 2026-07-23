@@ -2,7 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
-#include "../WeaponComponentInterface.h"
+#include "../Standard/WeaponComponentInterface.h"
 #include "WeaponMuzzleComponent.generated.h"
 
 

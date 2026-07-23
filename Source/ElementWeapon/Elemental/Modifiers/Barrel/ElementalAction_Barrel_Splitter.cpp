@@ -29,6 +29,6 @@ void UElementalAction_Barrel_Splitter::ExecuteBarrelModifier(UWeaponBarrelCompon
 	{			
 		//Rotacion + FRotator(FMath::RandRange(-SpreadAngle, SpreadAngle), FMath::RandRange(-SpreadAngle, SpreadAngle), 0.0f)
 		//Suma del Rotator Main, mas los dos Randoms, pero ahorramos memoria que esto se repite mucho.
-		BarrelComponent->SpawnSingleActor(Location, Rotacion + FRotator(FMath::RandRange(-SpreadAngle, SpreadAngle), FMath::RandRange(-SpreadAngle, SpreadAngle), 0.0f));
+		BarrelComponent->DeliverShot(Location, Rotacion + FRotator(FMath::RandRange(-SpreadAngle, SpreadAngle), FMath::RandRange(-SpreadAngle, SpreadAngle), 0.0f));
 	}
 }

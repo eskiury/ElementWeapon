@@ -2,7 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
-#include "../WeaponComponentInterface.h"
+#include "../Standard/WeaponComponentInterface.h"
 #include "WeaponTriggerComponent.generated.h"
 
 
@@ -24,6 +24,8 @@ public:
 
 	void FireShot();
 	FTimerHandle StreamTimerHandle;
+
+	FORCEINLINE class UElementalDataAsset* GetInfusedElement() const { return InfusedElement; }
 
 protected:
 	//Guardamos la referencia de arma para usarla cuando este componente dispare

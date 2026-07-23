@@ -1,7 +1,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "../../ElementalAction_Barrel.h"
+#include "../ElementalAction_Barrel.h"
 #include "ElementalAction_Barrel_Splitter.generated.h"
 
 /**

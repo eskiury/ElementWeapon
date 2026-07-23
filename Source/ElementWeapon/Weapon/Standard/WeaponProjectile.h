@@ -15,6 +15,9 @@ public:
 	class UElementalAction_Muzzle* MuzzleAction;
 
 	UPROPERTY(BlueprintReadWrite, Category = "Projectile | Payload")
+	class UElementalAction_Trigger* TriggerImpactAction;
+
+	UPROPERTY(BlueprintReadWrite, Category = "Projectile | Payload")
 	class UElementalDataAsset* ElementalData;
 
 	// Sets default values for this actor's properties

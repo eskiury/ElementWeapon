@@ -14,6 +14,9 @@ class ELEMENTWEAPON_API UElementalAction_Trigger : public UObject
 	GENERATED_BODY()
 
 public:
-	// El contrato que ejecutará el Gatillo cuando el jugador dispare
+	// Logica de tiempo o cadencia
 	virtual void ExecuteTriggerModifier(class UWeaponTriggerComponent* TriggerComponent) const{}
+
+	//Logica de accion de impacto, devuelve true si se tiene que destruir
+	virtual bool ExecuteTriggerImpactModifier(const FHitResult HitResult, const UWorld* World) const { return true; }
 };

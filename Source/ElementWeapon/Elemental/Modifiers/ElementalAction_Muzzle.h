@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "UObject/Object.h"
+#include "../../Weapon/Standard/StatusComponent.h"
 #include "ElementalAction_Muzzle.generated.h"
 
 /**
@@ -15,8 +16,5 @@ class ELEMENTWEAPON_API UElementalAction_Muzzle : public UObject
 
 public:
 	// El contrato que ejecutará el Gatillo cuando el jugador dispare
-	virtual bool ExecuteMuzzleModifier(class AWeaponProjectile* ProjectileContext, const FHitResult& HitResult) const
-	{
-		return true;
-	}
+	virtual void ExecuteMuzzleModifier(AActor* TargetActor, const FHitResult& HitResult) const {}
 };

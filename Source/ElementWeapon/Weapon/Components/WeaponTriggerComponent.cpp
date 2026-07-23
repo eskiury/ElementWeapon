@@ -1,6 +1,6 @@
 #include "WeaponTriggerComponent.h"
 
-#include "../WeaponBase.h"
+#include "../Standard/WeaponBase.h"
 #include "../../Elemental/ElementalDataAsset.h"
 
 UWeaponTriggerComponent::UWeaponTriggerComponent()

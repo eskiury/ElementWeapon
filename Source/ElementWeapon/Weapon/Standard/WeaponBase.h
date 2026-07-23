@@ -6,9 +6,6 @@
 #include "GameFramework/Actor.h"
 
 #include "WeaponComponentInterface.h"
-//#include"Components/WeaponTriggerComponent.h"
-//#include"Components/WeaponBarrelComponent.h"
-//#include"Components/WeaponMuzzleComponent.h"
 
 #include "WeaponBase.generated.h"
 
@@ -47,7 +44,8 @@ public:
 
 	//Funciones parra modificar con cada componente del arma
 	void ShotBarrel() const;
-	void ShotMuzzle(class AWeaponProjectile* Projectile) const;
+	void SetupPayload(class AWeaponProjectile* Projectile) const;
+	void HandleHitscanImpact(const FHitResult& LineTrace) const;
 
 
 private:

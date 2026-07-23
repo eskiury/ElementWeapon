@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "../../ElementalAction_Trigger.h"
+#include "../ElementalAction_Trigger.h"
 #include "ElementalAction_Trigger_Auto.generated.h"
 
 /**
@@ -21,6 +21,8 @@ protected:
 	float FireRate = 0.1f;
 
 	virtual void ExecuteTriggerModifier(class UWeaponTriggerComponent* TriggerComponent) const override;
+
+	virtual bool ExecuteTriggerImpactModifier(const FHitResult HitResult, const UWorld* World) const override;
 
 	FActorSpawnParameters SpawnParams;
 
