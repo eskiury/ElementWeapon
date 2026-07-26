@@ -26,7 +26,9 @@ void UWeaponBarrelComponent::FireBarrel()
 	if (InfusedElement != nullptr && InfusedElement->BarrelAction != nullptr)
 	{
 		//SÍ: Le cedemos el control al Splitter (él se encargará de llamar al spawn del proyectil
+		//ShootingMode = InfusedElement->BarrelAction->GetShootingMode();
 		InfusedElement->BarrelAction->ExecuteBarrelModifier(this);
+		
 	}
 	else
 	{
@@ -51,6 +53,7 @@ void UWeaponBarrelComponent::FireBarrel()
 		}
 
 		//Llamamos a tu spawner físico para lanzar la bala única
+		//ShootingMode = ShotingMode::Projectile;
 		DeliverShot(SpawnLocation, SpawnRotation);
 		//UE_LOG(LogTemp, Log, TEXT("Spawn Projectile	"));
 
@@ -58,10 +61,16 @@ void UWeaponBarrelComponent::FireBarrel()
 }
 void UWeaponBarrelComponent::DeliverShot(FVector Location, FRotator Rotation) const
 {
-	//OJO con esto esta aqui porque sino al cambiar puede generar problemas de datos stale o congelados pero puede que haya que moverlo a donde se gestiona el cambio de elemento
+	//InfusedElement->BarrelAction
 
+	//if (!InfusedElement || !InfusedElement->BarrelAction) return;
+	if (!InfusedElement || !InfusedElement->BarrelAction)
+	{
+		ExecuteProjectileShot(Location, Rotation);
+		return;
+	}
 
-	switch (ShootingMode)
+	switch (InfusedElement->BarrelAction->GetShootingMode())
 	{
 	case ShotingMode::Projectile:	
 
@@ -74,8 +83,10 @@ void UWeaponBarrelComponent::DeliverShot(FVector Location, FRotator Rotation) co
 		break;
 
 	case ShotingMode::Stream:
+		ExecuteStreamShot(Location,Rotation);
 		break;
 	default:
+		ExecuteProjectileShot(Location, Rotation);
 		break;
 	}
 }
@@ -134,5 +145,40 @@ void UWeaponBarrelComponent::ExecuteHitsCanShot(FVector Location, FRotator Rotat
 
 void UWeaponBarrelComponent::ExecuteStreamShot(FVector Location, FRotator Rotation) const
 {
+	FCollisionShape Sphere = FCollisionShape::MakeSphere(StreamRadius);
+	FVector  TraceEnd = Rotation.Vector() * StreamRange + Location;
+	TArray<FHitResult> HitResults;
+
+	FCollisionQueryParams Params;
+
+	Params.AddIgnoredActor(GetOwner());
+	Params.AddIgnoredActor(GetOwner()->GetOwner());
+	Params.bTraceComplex = true;
+	Params.bReturnPhysicalMaterial = true;
+
+	bool bHit = GetWorld()->SweepMultiByChannel(
+		HitResults,
+		Location,
+		TraceEnd,
+		FQuat::Identity,
+		HitscanChannel,
+		Sphere,
+		Params
+	);
+
+	if (bHit)
+	{
+		TSet<AActor*> ProcessedActors;
+		for (const FHitResult& Hited : HitResults)
+		{
+			AActor* HitedActor = Hited.GetActor();
+			if (!ProcessedActors.Contains(HitedActor))
+			{
+				ProcessedActors.Add(HitedActor);
+				DrawDebugSphere(GetWorld(), Hited.ImpactPoint, 15.0f, 8, FColor::Orange, false, 1.0f);
+				MyWeaponOwner->HandleHitscanImpact(Hited);
+			}
+		}
+	}
 	return;
 }
