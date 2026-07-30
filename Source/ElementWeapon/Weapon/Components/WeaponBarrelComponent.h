@@ -7,13 +7,6 @@
 
 #include "WeaponBarrelComponent.generated.h"
 
-//UENUM(BlueprintType)
-//enum class ShotingMode : uint8
-//{
-//	Projectile	UMETA(DisplayName = "Parabola"),
-//	Hitscan		UMETA(DisplayName = "Laser"),
-//	Stream		UMETA(DisplayName = "Lanzallamas")
-//};
 
 UCLASS(Abstract, Blueprintable)
 class ELEMENTWEAPON_API UWeaponBarrelComponent : public UActorComponent, public IWeaponComponentInterface
@@ -23,8 +16,6 @@ class ELEMENTWEAPON_API UWeaponBarrelComponent : public UActorComponent, public 
 	void ExecuteProjectileShot(FVector Location, FRotator Rotation) const;
 	void ExecuteHitsCanShot(FVector Location, FRotator Rotation) const;
 	void ExecuteStreamShot(FVector Location, FRotator Rotation) const;
-
-	//ShotingMode ShootingMode;
 
 public:	
 	// Sets default values for this component's properties
