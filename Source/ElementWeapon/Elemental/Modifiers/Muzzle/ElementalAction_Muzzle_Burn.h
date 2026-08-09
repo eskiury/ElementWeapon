@@ -4,9 +4,7 @@
 #include "../ElementalAction_Muzzle.h"
 #include "ElementalAction_Muzzle_Burn.generated.h"
 
-/**
- * 
- */
+
 UCLASS()
 class ELEMENTWEAPON_API UElementalAction_Muzzle_Burn : public UElementalAction_Muzzle
 {
@@ -23,4 +21,6 @@ public:
 	virtual void OnStatusTick(class UStatusComponent* TargetComp, struct FActiveStatusEffect& EffectData) const override;
 
 	virtual void OnStatusExpired(class UStatusComponent* TargetComp, const struct FActiveStatusEffect& EffectData) const override;
+
+
 };

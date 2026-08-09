@@ -5,9 +5,8 @@
 #include "../../Weapon/Standard/StatusComponent.h"
 #include "ElementalAction_Muzzle.generated.h"
 
-/**
- * 
- */
+class ADamageNumberActor;
+
 //EditInLine es para poder instanciarlo directamente en el DataAsset
 UCLASS(Abstract, EditInlineNew, DefaultToInstanced, Blueprintable)
 class ELEMENTWEAPON_API UElementalAction_Muzzle : public UObject
@@ -25,4 +24,12 @@ public:
 
 	// Se ejecuta cuando el efecto llega a 0 segundos y se elimina (revertir velocidad, apagar fuego...)
 	virtual void OnStatusExpired(class UStatusComponent* TargetComp, const struct FActiveStatusEffect& EffectData) const {}
+
+protected:
+
+	UPROPERTY(EditDefaultsOnly, Category = "Visuals")
+	TSubclassOf<class ADamageNumberActor> DamageActorClass;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Visuals")
+	FLinearColor ElementColor = FLinearColor::White;
 };
