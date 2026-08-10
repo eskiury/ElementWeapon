@@ -4,8 +4,11 @@
 
 //Cosas de la explosion
 #include "../../../Weapon/Standard/WeaponProjectile.h"
+#include "Engine/OverlapResult.h"
 #include "Kismet/GameplayStatics.h"
 #include "DrawDebugHelpers.h" // Para poder pintar la esfera visual temporal
+
+#include "../../../Weapon/Standard/StatusComponent.h"
 
 void UElementalAction_Trigger_Auto::ExecuteTriggerModifier(UWeaponTriggerComponent* TriggerComponent) const
 {
@@ -26,14 +29,15 @@ void UElementalAction_Trigger_Auto::ExecuteTriggerModifier(UWeaponTriggerCompone
     }
 }
 
-bool UElementalAction_Trigger_Auto::ExecuteTriggerImpactModifier(const FHitResult HitResult, const UWorld* World) const
+TSet<AActor*> UElementalAction_Trigger_Auto::ExecuteTriggerImpactModifier(const FHitResult HitResult, const UWorld* World) const
 {
 	//if (ProjectileContext == nullptr || ProjectileContext->GetWorld() == nullptr) return true;
 	//if (HitResult.) return true;
-
+	TSet<AActor*> ProcessedActors;
 	if(World == nullptr)
 	{
-		return false;
+		//Se devuelve vacio
+		return ProcessedActors;
 	}
 
 	// 1. Extraemos el punto exacto donde la bala chocó físicamente
@@ -66,10 +70,33 @@ bool UElementalAction_Trigger_Auto::ExecuteTriggerImpactModifier(const FHitResul
 		nullptr // Instigador
 	);
 
-	// OPCIONAL: Si tienes cajas con físicas activadas (Simulate Physics) en tu nivel,
-	// puedes aplicar una fuerza de empuje directa aquí o dejar que el motor la reciba.
+	FCollisionShape ExplosionSphere = FCollisionShape::MakeSphere(ExplosionRadius);
+	TArray<FOverlapResult>OverlapResults;
+	FCollisionQueryParams Params;
+	Params.bTraceComplex = true;
 
-	// Devolvemos true para indicarle a la bala que proceda a destruirse
-	return true;
+	bool bHasOverlaps = World->OverlapMultiByChannel(
+		OverlapResults,
+		ImpactPoint,
+		FQuat::Identity,
+		ECC_Pawn,	//O el canal de colision que usen tus enemigos
+		ExplosionSphere,
+		Params
+	);
+
+	if (bHasOverlaps)
+	{
+		for (const FOverlapResult& Overlap : OverlapResults)
+		{
+			AActor* HitActor = Overlap.GetActor();
+
+			if (HitActor && !ProcessedActors.Contains(HitActor))
+			{
+				ProcessedActors.Add(HitActor);
+			}
+		}
+	}
+
+	return ProcessedActors;
 }
 

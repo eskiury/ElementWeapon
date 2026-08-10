@@ -151,6 +151,7 @@ void UWeaponBarrelComponent::ExecuteStreamShot(FVector Location, FRotator Rotati
 
 	FCollisionQueryParams Params;
 
+
 	Params.AddIgnoredActor(GetOwner());
 	Params.AddIgnoredActor(GetOwner()->GetOwner());
 	Params.bTraceComplex = true;

@@ -18,5 +18,5 @@ public:
 	virtual void ExecuteTriggerModifier(class UWeaponTriggerComponent* TriggerComponent) const{}
 
 	//Logica de accion de impacto, devuelve true si se tiene que destruir
-	virtual bool ExecuteTriggerImpactModifier(const FHitResult HitResult, const UWorld* World) const { return true; }
+	virtual TSet<AActor*> ExecuteTriggerImpactModifier(const FHitResult HitResult, const UWorld* World) const { return TSet<AActor*>(); }
 };

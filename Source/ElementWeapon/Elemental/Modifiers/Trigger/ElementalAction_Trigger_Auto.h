@@ -22,7 +22,7 @@ protected:
 
 	virtual void ExecuteTriggerModifier(class UWeaponTriggerComponent* TriggerComponent) const override;
 
-	virtual bool ExecuteTriggerImpactModifier(const FHitResult HitResult, const UWorld* World) const override;
+	virtual TSet<AActor*> ExecuteTriggerImpactModifier(const FHitResult HitResult, const UWorld* World) const override;
 
 	FActorSpawnParameters SpawnParams;
 

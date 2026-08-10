@@ -31,52 +31,53 @@ AWeaponProjectile::AWeaponProjectile()
 }
 
 void AWeaponProjectile::NotifyHit(
-	UPrimitiveComponent* MyComp, 
-	AActor* Other, 
-	UPrimitiveComponent* OtherComp, 
-	bool bSelfMoved, 
-	FVector HitLocation, 
-	FVector HitNormal, 
-	FVector NormalImpulse, 
+	UPrimitiveComponent* MyComp,
+	AActor* Other,
+	UPrimitiveComponent* OtherComp,
+	bool bSelfMoved,
+	FVector HitLocation,
+	FVector HitNormal,
+	FVector NormalImpulse,
 	const FHitResult& Hit)
 {
-	//UE_LOG(LogTemp, Warning, TEXT("PADRE BALA: %s"), *GetOwner()->GetName());
-
-	//Comprobamos que no estamos chocando con nosotros mismos
+	// 1. Filtro de seguridad (no chocamos con nosotros mismos ni con el jugador)
 	if (Other->GetOwner() == GetOwner() || Other == GetOwner()->GetOwner())
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Bala chocando con sigo misma o con jugador"));
+		UE_LOG(LogTemp, Warning, TEXT("Bala chocando consigo misma o con el jugador"));
 		return;
 	}
-	if (MuzzleAction != nullptr)
+
+	TSet<AActor*> AffectedActors;
+
+	// 2. Determinar qué actores han sido afectados según si hay Gatillo especial o no
+	if (TriggerImpactAction != nullptr)
 	{
-		//Comprobamos que sea un enemigo
-		UStatusComponent* StatusEnemy = Other->FindComponentByClass<UStatusComponent>();
-		if (StatusEnemy != nullptr)
-		{
-			MuzzleAction->ExecuteMuzzleModifier(Other, Hit);
-		}
-		//Se podria meter un else para interaccionar con el entorno
-		//Flow else otro componente quemar pared...
-	}
-		
-	//Empieza logica del trigger
-	if (TriggerImpactAction == nullptr)
-	{
-		//UE_LOG(LogTemp, Log, TEXT("Bala destruida por impacto"));
-		Destroy();
-		return;
+		// Si es una explosión/barrido, el Gatillo nos devuelve todos los atrapados en el radio
+		AffectedActors = TriggerImpactAction->ExecuteTriggerImpactModifier(Hit, GetWorld());
 	}
 	else
 	{
-		bool bShouldDestroy = TriggerImpactAction->ExecuteTriggerImpactModifier(Hit, GetOwner()->GetWorld());
-		
-		if (bShouldDestroy)
+		// Si es una bala estándar sin Gatillo, el único afectado es el actor con el que chocamos directamente
+		if (Other != nullptr)
 		{
-			Destroy();
-			return;
+			AffectedActors.Add(Other);
 		}
 	}
+
+	// 3. Aplicar el efecto elemental (MuzzleAction) a todos los actores del conjunto
+	if (MuzzleAction != nullptr && !AffectedActors.IsEmpty())
+	{
+		for (AActor* Actor : AffectedActors)
+		{
+			if (Actor && Actor->FindComponentByClass<UStatusComponent>())
+			{
+				MuzzleAction->ExecuteMuzzleModifier(Actor, Hit);
+			}
+		}
+	}
+
+	// 4. Una vez procesado el impacto y los efectos, la bala se destruye
+	Destroy();
 }
 
 

@@ -156,23 +156,48 @@ void AWeaponBase::SetupPayload(AWeaponProjectile* Projectile) const
 
 void AWeaponBase::HandleHitscanImpact(const FHitResult& LineTrace) const
 {
-	AActor* ActorHit = LineTrace.GetActor();
-	if (ActorHit == nullptr || CurrentMuzzle == nullptr) return;
+	TSet<AActor*> AffectedActors;
 
-	UElementalDataAsset* MuzzleElement = CurrentMuzzle->GetInfusedElement();
-
-	//Este if es porque en principio no se sabe si se van a utilizar acciones unicas con cada efecto de momenot se deja asi
-	//if (MuzzleElement != nullptr && MuzzleElement->MuzzleAction)
-
-	if (MuzzleElement != nullptr)
+	// 1. Extraemos la Acción del Gatillo (si existe)
+	UElementalAction_Trigger* TriggerAction = nullptr;
+	if (CurrentTrigger && CurrentTrigger->GetInfusedElement())
 	{
-		MuzzleElement->MuzzleAction->ExecuteMuzzleModifier(ActorHit, LineTrace);
+		TriggerAction = CurrentTrigger->GetInfusedElement()->TriggerAction;
 	}
 
-	// Opcional: Si el Gatillo tiene un efecto de impacto físico (como una explosión), también lo detonamos aquí
-	if (CurrentTrigger && CurrentTrigger->GetInfusedElement() && CurrentTrigger->GetInfusedElement()->TriggerAction)
+	// 2. Determinar qué actores han sido afectados
+	if (TriggerAction != nullptr)
 	{
-		CurrentTrigger->GetInfusedElement()->TriggerAction->ExecuteTriggerImpactModifier(LineTrace, GetWorld());
+		// Si hay un Gatillo especial (ej: explosión), él calcula los actores atrapados en el radio del impacto
+		AffectedActors = TriggerAction->ExecuteTriggerImpactModifier(LineTrace, GetWorld());
+	}
+	else
+	{
+		// Si es un disparo directo sin área, el único afectado es el actor golpeado directamente por el rayo
+		AActor* ActorHit = LineTrace.GetActor();
+		if (ActorHit != nullptr)
+		{
+			AffectedActors.Add(ActorHit);
+		}
+	}
+
+	// 3. Extraemos la Acción de la Punta (Muzzle)
+	UElementalAction_Muzzle* MuzzleAction = nullptr;
+	if (CurrentMuzzle && CurrentMuzzle->GetInfusedElement())
+	{
+		MuzzleAction = CurrentMuzzle->GetInfusedElement()->MuzzleAction;
+	}
+
+	// 4. Aplicamos el efecto elemental a todos los actores del conjunto que tengan StatusComponent
+	if (MuzzleAction != nullptr && !AffectedActors.IsEmpty())
+	{
+		for (AActor* Actor : AffectedActors)
+		{
+			if (Actor && Actor->FindComponentByClass<UStatusComponent>())
+			{
+				MuzzleAction->ExecuteMuzzleModifier(Actor, LineTrace);
+			}
+		}
 	}
 }
 
