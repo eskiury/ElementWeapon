@@ -4,7 +4,7 @@
 #include "Components/StaticMeshComponent.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "../../Elemental/Modifiers/ElementalAction_Muzzle.h"
-#include "../../Elemental/Modifiers/ElementalAction_Trigger.h"
+#include "../../Elemental/Modifiers/ElementalAction_Impact.h"
 #include "StatusComponent.h"
 
 
@@ -30,6 +30,9 @@ AWeaponProjectile::AWeaponProjectile()
 	ProjectileMovement->InitialSpeed = 1000.0f;
 }
 
+
+
+
 void AWeaponProjectile::NotifyHit(
 	UPrimitiveComponent* MyComp,
 	AActor* Other,
@@ -40,28 +43,30 @@ void AWeaponProjectile::NotifyHit(
 	FVector NormalImpulse,
 	const FHitResult& Hit)
 {
-	// 1. Filtro de seguridad (no chocamos con nosotros mismos ni con el jugador)
-	if (Other->GetOwner() == GetOwner() || Other == GetOwner()->GetOwner())
+	// 1. Filtro de seguridad garantizado
+	if (Other == nullptr) return;
+
+	AActor* MyOwner = GetOwner();
+	if (MyOwner)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Bala chocando consigo misma o con el jugador"));
-		return;
+		// Si chocamos con nosotros mismos, con nuestro dueño (el jugador) o con el dueño de nuestro dueño
+		if (Other == MyOwner || Other->GetOwner() == MyOwner || (MyOwner->GetOwner() && Other == MyOwner->GetOwner()))
+		{
+			return;
+		}
 	}
 
+	bool bShouldDestroy = true;
 	TSet<AActor*> AffectedActors;
 
 	// 2. Determinar qué actores han sido afectados según si hay Gatillo especial o no
-	if (TriggerImpactAction != nullptr)
+	if (ImpactAction != nullptr)
 	{
-		// Si es una explosión/barrido, el Gatillo nos devuelve todos los atrapados en el radio
-		AffectedActors = TriggerImpactAction->ExecuteTriggerImpactModifier(Hit, GetWorld());
+		AffectedActors = ImpactAction->ExecuteImpactModifier(Hit, GetWorld(), bShouldDestroy);
 	}
 	else
 	{
-		// Si es una bala estándar sin Gatillo, el único afectado es el actor con el que chocamos directamente
-		if (Other != nullptr)
-		{
-			AffectedActors.Add(Other);
-		}
+		AffectedActors.Add(Other);
 	}
 
 	// 3. Aplicar el efecto elemental (MuzzleAction) a todos los actores del conjunto
@@ -76,8 +81,11 @@ void AWeaponProjectile::NotifyHit(
 		}
 	}
 
-	// 4. Una vez procesado el impacto y los efectos, la bala se destruye
-	Destroy();
+	// 4. Destrucción condicional
+	if (bShouldDestroy)
+	{
+		Destroy();
+	}
 }
 
 

@@ -16,9 +16,9 @@ void UWeaponTriggerComponent::InitializeComponentContext(AWeaponBase* Weapon)
 
 void UWeaponTriggerComponent::PullTrigger()
 {
-	if (InfusedElement != nullptr && InfusedElement->TriggerAction != nullptr)
+	if (InfusedElement != nullptr && InfusedElement->FireModeAction != nullptr)
 	{
-		InfusedElement->TriggerAction->ExecuteTriggerModifier(this);
+		InfusedElement->FireModeAction->ExecuteFireMode(this);
 	}
 	else
 	{

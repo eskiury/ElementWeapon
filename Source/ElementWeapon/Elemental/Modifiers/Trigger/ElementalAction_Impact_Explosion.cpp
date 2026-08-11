@@ -1,40 +1,15 @@
-#include "ElementalAction_Trigger_Auto.h"
+#include "ElementalAction_Impact_Explosion.h"
 
-#include "../../../Weapon/Components/WeaponTriggerComponent.h"
-
-//Cosas de la explosion
-#include "../../../Weapon/Standard/WeaponProjectile.h"
 #include "Engine/OverlapResult.h"
 #include "Kismet/GameplayStatics.h"
 #include "DrawDebugHelpers.h" // Para poder pintar la esfera visual temporal
 
-#include "../../../Weapon/Standard/StatusComponent.h"
 
-void UElementalAction_Trigger_Auto::ExecuteTriggerModifier(UWeaponTriggerComponent* TriggerComponent) const
+TSet<AActor*> UElementalAction_Impact_Explosion::ExecuteImpactModifier(const FHitResult& HitResult, const UWorld* World, bool& bOutShouldDestroy) const
 {
-    if (!TriggerComponent) return;
-
-    UWorld* World = TriggerComponent->GetWorld();
-    if (!World) return;
-
-    if (!World->GetTimerManager().IsTimerActive(TriggerComponent->StreamTimerHandle))
-    {
-        World->GetTimerManager().SetTimer(
-            TriggerComponent->StreamTimerHandle,
-            TriggerComponent,
-            &UWeaponTriggerComponent::FireShot,
-            FireRate,
-            true
-        );
-    }
-}
-
-TSet<AActor*> UElementalAction_Trigger_Auto::ExecuteTriggerImpactModifier(const FHitResult HitResult, const UWorld* World) const
-{
-	//if (ProjectileContext == nullptr || ProjectileContext->GetWorld() == nullptr) return true;
-	//if (HitResult.) return true;
+	bOutShouldDestroy = true;
 	TSet<AActor*> ProcessedActors;
-	if(World == nullptr)
+	if (World == nullptr)
 	{
 		//Se devuelve vacio
 		return ProcessedActors;
@@ -42,7 +17,6 @@ TSet<AActor*> UElementalAction_Trigger_Auto::ExecuteTriggerImpactModifier(const 
 
 	// 1. Extraemos el punto exacto donde la bala chocó físicamente
 	FVector ImpactPoint = HitResult.ImpactPoint;
-	float ExplosionRadius = 300.0f;
 
 	// 2. Pintamos una esfera roja transparente durante 2 segundos para "ver" la explosión
 	DrawDebugSphere(
@@ -61,7 +35,7 @@ TSet<AActor*> UElementalAction_Trigger_Auto::ExecuteTriggerImpactModifier(const 
 	// Esto buscará cualquier objeto con físicas activas dentro del radio y lo empujará con fuerza radial.
 	UGameplayStatics::ApplyRadialDamage(
 		World,
-		10.0f, // Daño base (por si añades sistema de vida después)
+		RadialDamage, // Daño base (por si añades sistema de vida después)
 		ImpactPoint,
 		ExplosionRadius,
 		UDamageType::StaticClass(),
@@ -99,4 +73,3 @@ TSet<AActor*> UElementalAction_Trigger_Auto::ExecuteTriggerImpactModifier(const 
 
 	return ProcessedActors;
 }
-

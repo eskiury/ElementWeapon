@@ -15,7 +15,7 @@ public:
 	class UElementalAction_Muzzle* MuzzleAction;
 
 	UPROPERTY(BlueprintReadWrite, Category = "Projectile | Payload")
-	class UElementalAction_Trigger* TriggerImpactAction;
+	class UElementalAction_Impact* ImpactAction;	
 
 	UPROPERTY(BlueprintReadWrite, Category = "Projectile | Payload")
 	class UElementalDataAsset* ElementalData;

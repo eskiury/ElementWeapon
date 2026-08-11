@@ -143,7 +143,7 @@ void AWeaponBase::SetupPayload(AWeaponProjectile* Projectile) const
 	if (TriggerElement != nullptr)
 	{
 		//Inyectamos la acion lógica del impacto (Ej: Explotar o rebotar)
-		Projectile->TriggerImpactAction = TriggerElement->TriggerAction;
+		Projectile->ImpactAction = TriggerElement->ImpactAction;
 
 		// Inyectamos el Data Asset completo para efectos visuales o tipo de daño
 		//Projectile->ElementalData = TriggerElement; //OOOOOOOOJOOOOOOOOO Puede que esto tenga que ser el del trigger hay que ver a futuro
@@ -157,19 +157,20 @@ void AWeaponBase::SetupPayload(AWeaponProjectile* Projectile) const
 void AWeaponBase::HandleHitscanImpact(const FHitResult& LineTrace) const
 {
 	TSet<AActor*> AffectedActors;
+	bool bShouldDestroy = false;
 
 	// 1. Extraemos la Acción del Gatillo (si existe)
-	UElementalAction_Trigger* TriggerAction = nullptr;
+	UElementalAction_Impact* TriggerAction = nullptr;
 	if (CurrentTrigger && CurrentTrigger->GetInfusedElement())
 	{
-		TriggerAction = CurrentTrigger->GetInfusedElement()->TriggerAction;
+		TriggerAction = CurrentTrigger->GetInfusedElement()->ImpactAction;
 	}
 
 	// 2. Determinar qué actores han sido afectados
 	if (TriggerAction != nullptr)
 	{
 		// Si hay un Gatillo especial (ej: explosión), él calcula los actores atrapados en el radio del impacto
-		AffectedActors = TriggerAction->ExecuteTriggerImpactModifier(LineTrace, GetWorld());
+		AffectedActors = TriggerAction->ExecuteImpactModifier(LineTrace, GetWorld(), bShouldDestroy);
 	}
 	else
 	{

@@ -1,7 +1,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "UObject/Object.h"
+#include "../ElementalAction.h"
+
 #include "../../Weapon/Standard/StatusComponent.h"
 #include "ElementalAction_Muzzle.generated.h"
 
@@ -9,7 +10,7 @@ class ADamageNumberActor;
 
 //EditInLine es para poder instanciarlo directamente en el DataAsset
 UCLASS(Abstract, EditInlineNew, DefaultToInstanced, Blueprintable)
-class ELEMENTWEAPON_API UElementalAction_Muzzle : public UObject
+class ELEMENTWEAPON_API UElementalAction_Muzzle : public UElementalAction
 {
 	GENERATED_BODY()
 

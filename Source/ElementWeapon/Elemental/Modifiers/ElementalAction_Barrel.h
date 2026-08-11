@@ -1,7 +1,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "UObject/Object.h"
+#include "../ElementalAction.h"
+
 #include "ElementalAction_Barrel.generated.h"
 
 
@@ -16,7 +17,7 @@ enum class ShotingMode : uint8
 
 //EditInLine es para poder instanciarlo directamente en el DataAsset
 UCLASS(Abstract, EditInlineNew, DefaultToInstanced, Blueprintable)
-class ELEMENTWEAPON_API UElementalAction_Barrel : public UObject
+class ELEMENTWEAPON_API UElementalAction_Barrel : public UElementalAction
 {
 	GENERATED_BODY()
 
