@@ -67,14 +67,26 @@ bool UStatusComponent::ApplyStatusEffect(TSubclassOf<UElementalAction_Muzzle> Ef
 	{
 		if (Effect.EffectClass == EffectClass)
 		{
-			Effect.RemainingDuration = Duration;
+			//Effect.RemainingDuration = Duration;
 			Effect.StackCount++;
+			const UElementalAction_Muzzle* ActionCDO = Effect.EffectClass->GetDefaultObject<UElementalAction_Muzzle>();
+			if (ActionCDO)
+			{
+				ActionCDO->OnStatusHitted(this, Effect);
+			}
 			return true;
 		}
 	}
 
 	FActiveStatusEffect StatusEffect = { EffectClass, TickInterval, Duration, 0.0f };
 	ActiveEffects.Add(StatusEffect);
+	
+	const UElementalAction_Muzzle* ActionCDO = ActiveEffects.Last().EffectClass->GetDefaultObject<UElementalAction_Muzzle>();
+
+	if (ActionCDO)
+	{
+		ActionCDO->OnStatusHitted(this, ActiveEffects.Last());
+	}
 
 	return false;
 }

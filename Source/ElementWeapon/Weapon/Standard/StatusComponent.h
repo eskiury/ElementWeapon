@@ -32,6 +32,10 @@ class ELEMENTWEAPON_API UStatusComponent : public UActorComponent
 	float Health = 100.0f;
 	float Size = 1.0f;
 	float Damage = 1.0f;
+	float Armor = 1.0f;
+
+	float MaxSpeed = 300.0f;
+	bool Frozen = false;
 
 	UPROPERTY(VisibleAnywhere, Category = "Status Effects")
 	TArray<FActiveStatusEffect> ActiveEffects;
@@ -56,6 +60,7 @@ public:
 		if (NewSpeed <= 0) { Speed = 0; }
 		else { Speed = NewSpeed; }
 	}
+	FORCEINLINE float GetMaxSpeed() const { return MaxSpeed; }
 
 	FORCEINLINE float GetHealth() const { return Health; }
 	FORCEINLINE void SetHealth(float NewHealth) 
@@ -75,7 +80,17 @@ public:
 	FORCEINLINE void SetDamage(float NewDamage)
 	{
 		if (NewDamage <= 0) { Damage = 0; }
-		else { Damage = NewDamage; }
+		else { Damage = NewDamage / Armor; }
 	}
+
+	FORCEINLINE float GetArmor() const { return Armor; }
+	FORCEINLINE void SetArmor(float NewArmor)
+	{
+		if (NewArmor <= 0) { Armor = 0; }
+		else { Armor = NewArmor; }
+	}
+
+	FORCEINLINE bool GetFrozen() const { return Frozen; }
+	FORCEINLINE void SetFrozen(bool NewFrozen) { Frozen = NewFrozen; }
 
 };
