@@ -121,37 +121,15 @@ void AWeaponBase::ShotBarrel() const
 
 void AWeaponBase::SetupPayload(AWeaponProjectile* Projectile) const
 {
-	if (Projectile == nullptr || CurrentMuzzle == nullptr || CurrentTrigger == nullptr) return;
+	if (Projectile == nullptr) return;
 
-	UElementalDataAsset* MuzzleElement = CurrentMuzzle->GetInfusedElement();
+	UElementalAction_Muzzle* MuzzleMod = (CurrentMuzzle && CurrentMuzzle->GetInfusedElement())
+		? CurrentMuzzle->GetInfusedElement()->MuzzleAction : nullptr;
 
-	if (MuzzleElement != nullptr)
-	{
-		// Inyectamos la acción lógica de efecto sobre enemigo (Ej: Crear quemar o envenenar)
-		Projectile->MuzzleAction = MuzzleElement->MuzzleAction;
+	UElementalAction_Impact* ImpactMod = (CurrentTrigger && CurrentTrigger->GetInfusedElement())
+		? CurrentTrigger->GetInfusedElement()->ImpactAction : nullptr;
 
-		// Inyectamos el Data Asset completo para efectos visuales o tipo de daño
-		Projectile->ElementalData = MuzzleElement; //OOOOOOOOJOOOOOOOOO Puede que esto tenga que ser el del trigger hay que ver a futuro
-	}
-	else
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Disparo Neutro: La Punta actual no tiene ningun elemento infusionado."));
-	}
-
-	UElementalDataAsset* TriggerElement = CurrentTrigger->GetInfusedElement();
-
-	if (TriggerElement != nullptr)
-	{
-		//Inyectamos la acion lógica del impacto (Ej: Explotar o rebotar)
-		Projectile->ImpactAction = TriggerElement->ImpactAction;
-
-		// Inyectamos el Data Asset completo para efectos visuales o tipo de daño
-		//Projectile->ElementalData = TriggerElement; //OOOOOOOOJOOOOOOOOO Puede que esto tenga que ser el del trigger hay que ver a futuro
-	}
-	else
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Disparo Neutro: El gatillo actual no tiene ningun elemento infusionado."));
-	}
+	Projectile->InitializeProjectilePayload(MuzzleMod, ImpactMod);
 }
 
 void AWeaponBase::HandleHitscanImpact(const FHitResult& LineTrace) const

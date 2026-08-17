@@ -7,7 +7,7 @@
 /**
  * 
  */
-UCLASS()
+UCLASS(Abstract, Blueprintable, EditInlineNew)
 class ELEMENTWEAPON_API UElementalAction_FireMode_Auto : public UElementalAction_FireMode
 {
 	GENERATED_BODY()

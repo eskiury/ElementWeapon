@@ -7,7 +7,7 @@
 /**
  * 
  */
-UCLASS()
+UCLASS(Abstract, Blueprintable, EditInlineNew)
 class ELEMENTWEAPON_API UElementalAction_Impact_Explosion : public UElementalAction_Impact
 {
 	GENERATED_BODY()

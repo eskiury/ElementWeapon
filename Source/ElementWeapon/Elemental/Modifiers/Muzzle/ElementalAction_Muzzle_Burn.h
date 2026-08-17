@@ -5,7 +5,7 @@
 #include "ElementalAction_Muzzle_Burn.generated.h"
 
 
-UCLASS()
+UCLASS(Abstract, Blueprintable, EditInlineNew)
 class ELEMENTWEAPON_API UElementalAction_Muzzle_Burn : public UElementalAction_Muzzle
 {
 	GENERATED_BODY()

@@ -2,6 +2,7 @@
 
 #include "../../Elemental/ElementalDataAsset.h"
 #include "../Standard/WeaponBase.h"
+#include "../../Elemental/Modifiers/Impact/ElementalAction_Impact_Pierce.h"
 //#include "/Game/BP_FirstPersonCharacter.BP_FirstPersonCharacter"
 
 
@@ -116,70 +117,211 @@ void UWeaponBarrelComponent::ExecuteProjectileShot(FVector Location, FRotator Ro
 
 void UWeaponBarrelComponent::ExecuteHitsCanShot(FVector Location, FRotator Rotation) const
 {
-	FCollisionQueryParams Params;
+	UWorld* World = GetWorld();
+	if (!World) return;
 
-	FHitResult HitResult;
-	Params.AddIgnoredActor(GetOwner());
-	Params.AddIgnoredActor(GetOwner()->GetOwner());
+	// 1. Determinar el límite de perforaciones
+	int32 MaxPierces = 1;
+	if (InfusedElement && InfusedElement->ImpactAction)
+	{
+		if (UElementalAction_Impact_Pierce* PierceMod = Cast<UElementalAction_Impact_Pierce>(InfusedElement->ImpactAction))
+		{
+			MaxPierces = PierceMod->MaxPierceCount;
+		}
+	}
+
+	// 2. Configurar parámetros de colisión
+	FCollisionQueryParams Params;
 	Params.bTraceComplex = true;
 	Params.bReturnPhysicalMaterial = true;
-
-	FVector  TraceEnd = Rotation.Vector() * 5000 + Location;
-
-	bool bHit = GetWorld()->LineTraceSingleByChannel(
-		HitResult,
-		Location,
-		TraceEnd,
-		HitscanChannel, // O usa tu ECC_Weapon
-		Params
-	);
-
-	DrawDebugLine(GetWorld(), Location, bHit ? HitResult.ImpactPoint : TraceEnd,
-		bHit ? FColor::Green : FColor::Red, false, 2.0f, 0, 1.0f);
-
-	if (bHit)
+	Params.AddIgnoredActor(GetOwner());
+	if (GetOwner() && GetOwner()->GetOwner())
 	{
-		MyWeaponOwner->HandleHitscanImpact(HitResult);
+		Params.AddIgnoredActor(GetOwner()->GetOwner());
+	}
+
+	FVector TraceDirection = Rotation.Vector();
+	float MaxRange = 5000.0f;
+	FVector CurrentStart = Location;
+	FVector FinalDestination = Location + (TraceDirection * MaxRange);
+
+	int32 PiercedCount = 0;
+	bool bHitAnything = false;
+
+	// 3. Bucle iterativo de perforación
+	while (PiercedCount < MaxPierces)
+	{
+		FHitResult Hit;
+		bool bHit = World->LineTraceSingleByChannel(
+			Hit,
+			CurrentStart,
+			FinalDestination,
+			HitscanChannel,
+			Params
+		);
+
+		// Si no golpea nada en este segmento (disparo al aire)
+		if (!bHit)
+		{
+			// 🔴 ROJO: Trayectoria hacia el aire libre
+			DrawDebugLine(World, CurrentStart, FinalDestination, FColor::Red, false, 1.0f, 0, 1.0f);
+			break;
+		}
+
+		bHitAnything = true;
+		AActor* HitActor = Hit.GetActor();
+
+		// Comprobar si es un enemigo (tiene StatusComponent)
+		bool bIsEnemy = (HitActor && HitActor->FindComponentByClass<UStatusComponent>() != nullptr);
+
+		if (bIsEnemy)
+		{
+			// 🟢 VERDE: Impacto y trayectoria hacia un enemigo atravesado
+			DrawDebugLine(World, CurrentStart, Hit.ImpactPoint, FColor::Green, false, 1.0f, 0, 1.0f);
+			DrawDebugSphere(World, Hit.ImpactPoint, 12.0f, 12, FColor::Green, false, 1.0f, 0, 1.0f);
+
+			// Aplicar efectos elementales y de impacto
+			MyWeaponOwner->HandleHitscanImpact(Hit);
+
+			// Contabilizar la perforación e ignorar a este enemigo para el siguiente segmento
+			PiercedCount++;
+			Params.AddIgnoredActor(HitActor);
+
+			// Avanzar el punto de inicio ligeramente por delante del punto de impacto para continuar la trayectoria
+			CurrentStart = Hit.ImpactPoint + (TraceDirection * 2.0f);
+		}
+		else
+		{
+			// 🔵 AZUL: Impacto contra pared, suelo o estructura del escenario
+			DrawDebugLine(World, CurrentStart, Hit.ImpactPoint, FColor::Blue, false, 1.0f, 0, 1.0f);
+			DrawDebugSphere(World, Hit.ImpactPoint, 12.0f, 12, FColor::Blue, false, 1.0f, 0, 1.0f);
+
+			// Se procesa el impacto en el entorno (por si hay explosión) y se corta el rayo
+			MyWeaponOwner->HandleHitscanImpact(Hit);
+			break;
+		}
+	}
+
+	// Si el primer intento no golpeó absolutamente nada
+	if (!bHitAnything && PiercedCount == 0)
+	{
+		// 🔴 ROJO: Disparo limpio al vacío
+		DrawDebugLine(World, Location, FinalDestination, FColor::Red, false, 1.0f, 0, 1.0f);
 	}
 }
 
 void UWeaponBarrelComponent::ExecuteStreamShot(FVector Location, FRotator Rotation) const
 {
-	FCollisionShape Sphere = FCollisionShape::MakeSphere(StreamRadius);
-	FVector  TraceEnd = Rotation.Vector() * StreamRange + Location;
-	TArray<FHitResult> HitResults;
+	UWorld* World = GetWorld();
+	if (!World) return;
 
-	FCollisionQueryParams Params;
-
-
-	Params.AddIgnoredActor(GetOwner());
-	Params.AddIgnoredActor(GetOwner()->GetOwner());
-	Params.bTraceComplex = true;
-	Params.bReturnPhysicalMaterial = true;
-
-	bool bHit = GetWorld()->SweepMultiByChannel(
-		HitResults,
-		Location,
-		TraceEnd,
-		FQuat::Identity,
-		HitscanChannel,
-		Sphere,
-		Params
-	);
-
-	if (bHit)
+	// 1. Determinar el límite de objetivos que puede atravesar el chorro
+	int32 MaxTargets = 3; // Límite base por defecto
+	if (InfusedElement && InfusedElement->ImpactAction)
 	{
-		TSet<AActor*> ProcessedActors;
-		for (const FHitResult& Hited : HitResults)
+		if (UElementalAction_Impact_Pierce* PierceMod = Cast<UElementalAction_Impact_Pierce>(InfusedElement->ImpactAction))
 		{
-			AActor* HitedActor = Hited.GetActor();
-			if (!ProcessedActors.Contains(HitedActor))
-			{
-				ProcessedActors.Add(HitedActor);
-				DrawDebugSphere(GetWorld(), Hited.ImpactPoint, 15.0f, 8, FColor::Orange, false, 1.0f);
-				MyWeaponOwner->HandleHitscanImpact(Hited);
-			}
+			MaxTargets = PierceMod->MaxPierceCount;
 		}
 	}
-	return;
+
+	// 2. Configurar parámetros del barrido
+	FCollisionQueryParams Params;
+	Params.bTraceComplex = true;
+	Params.bReturnPhysicalMaterial = true;
+	Params.AddIgnoredActor(GetOwner());
+	if (GetOwner() && GetOwner()->GetOwner())
+	{
+		Params.AddIgnoredActor(GetOwner()->GetOwner());
+	}
+
+	FVector TraceDir = Rotation.Vector();
+	FVector CurrentStart = Location;
+	FVector MaxDestination = Location + (TraceDir * StreamRange);
+	FCollisionShape SphereShape = FCollisionShape::MakeSphere(StreamRadius);
+
+	int32 TargetsAffected = 0;
+	FVector FinalImpactEnd = MaxDestination;
+
+	// 3. Barrido iterativo para traspasar enemigos hasta agotar las cargas
+	while (TargetsAffected < MaxTargets)
+	{
+		FHitResult Hit;
+		bool bHit = World->SweepSingleByChannel(
+			Hit,
+			CurrentStart,
+			MaxDestination,
+			FQuat::Identity,
+			HitscanChannel,
+			SphereShape,
+			Params
+		);
+
+		if (!bHit)
+		{
+			// El chorro llegó al final de su rango sin chocar con nada más
+			break;
+		}
+
+		AActor* HitActor = Hit.GetActor();
+		bool bIsEnemy = (HitActor && HitActor->FindComponentByClass<UStatusComponent>() != nullptr);
+
+		if (bIsEnemy)
+		{
+			// 🟢 VERDE: Esfera en el punto donde el cono toca al enemigo
+			DrawDebugSphere(World, Hit.ImpactPoint, 15.0f, 12, FColor::Green, false, 1.5f, 0, 1.5f);
+
+			MyWeaponOwner->HandleHitscanImpact(Hit);
+
+			TargetsAffected++;
+			Params.AddIgnoredActor(HitActor);
+
+			// Avanzamos el inicio del barrido para continuar detectando detrás
+			CurrentStart = Hit.Location + (TraceDir * 5.0f);
+		}
+		else
+		{
+			// 🔵 AZUL: Esfera en el obstáculo sólido que bloquea el chorro
+			DrawDebugSphere(World, Hit.ImpactPoint, 15.0f, 12, FColor::Blue, false, 1.5f, 0, 1.5f);
+
+			FinalImpactEnd = Hit.Location;
+			MyWeaponOwner->HandleHitscanImpact(Hit);
+			break;
+		}
+	}
+
+	// 4. DIBUJAR LOS BORDES DEL VOLUMEN (Caja/Túnel 3D)
+	FRotationMatrix RotMatrix(Rotation);
+	FVector RightVector = RotMatrix.GetScaledAxis(EAxis::Y) * StreamRadius;
+	FVector UpVector = RotMatrix.GetScaledAxis(EAxis::Z) * StreamRadius;
+
+	// 4 esquinas del inicio del cañón
+	FVector Start_TL = Location - RightVector + UpVector;
+	FVector Start_TR = Location + RightVector + UpVector;
+	FVector Start_BL = Location - RightVector - UpVector;
+	FVector Start_BR = Location + RightVector - UpVector;
+
+	// 4 esquinas del final del chorro (se detiene en paredes si hubo choque)
+	FVector End_TL = FinalImpactEnd - RightVector + UpVector;
+	FVector End_TR = FinalImpactEnd + RightVector + UpVector;
+	FVector End_BL = FinalImpactEnd - RightVector - UpVector;
+	FVector End_BR = FinalImpactEnd + RightVector - UpVector;
+
+	// Cuadrado frontal (salida)
+	DrawDebugLine(World, Start_TL, Start_TR, FColor::Orange, false, 1.0f, 0, 1.5f);
+	DrawDebugLine(World, Start_TR, Start_BR, FColor::Orange, false, 1.0f, 0, 1.5f);
+	DrawDebugLine(World, Start_BR, Start_BL, FColor::Orange, false, 1.0f, 0, 1.5f);
+	DrawDebugLine(World, Start_BL, Start_TL, FColor::Orange, false, 1.0f, 0, 1.5f);
+
+	// Cuadrado trasero (llegada)
+	DrawDebugLine(World, End_TL, End_TR, FColor::Orange, false, 1.0f, 0, 1.5f);
+	DrawDebugLine(World, End_TR, End_BR, FColor::Orange, false, 1.0f, 0, 1.5f);
+	DrawDebugLine(World, End_BR, End_BL, FColor::Orange, false, 1.0f, 0, 1.5f);
+	DrawDebugLine(World, End_BL, End_TL, FColor::Orange, false, 1.0f, 0, 1.5f);
+
+	// Aristas longitudinales del túnel
+	DrawDebugLine(World, Start_TL, End_TL, FColor::Orange, false, 1.0f, 0, 1.5f);
+	DrawDebugLine(World, Start_TR, End_TR, FColor::Orange, false, 1.0f, 0, 1.5f);
+	DrawDebugLine(World, Start_BL, End_BL, FColor::Orange, false, 1.0f, 0, 1.5f);
+	DrawDebugLine(World, Start_BR, End_BR, FColor::Orange, false, 1.0f, 0, 1.5f);
 }

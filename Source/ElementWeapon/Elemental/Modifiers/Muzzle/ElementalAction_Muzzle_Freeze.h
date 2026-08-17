@@ -7,7 +7,7 @@
 /**
  * 
  */
-UCLASS()
+UCLASS(Abstract, Blueprintable, EditInlineNew)
 class ELEMENTWEAPON_API UElementalAction_Muzzle_Freeze : public UElementalAction_Muzzle
 {
 	GENERATED_BODY()

@@ -4,40 +4,54 @@
 #include "GameFramework/Actor.h"
 #include "WeaponProjectile.generated.h"
 
+class USphereComponent;
+class UStaticMeshComponent;
+class UProjectileMovementComponent;
+class UElementalAction_Muzzle;
+class UElementalAction_Impact;
+
 UCLASS()
 class ELEMENTWEAPON_API AWeaponProjectile : public AActor
 {
 	GENERATED_BODY()
-	
-public:	
-	// CARGA ÚTIL (Pública para que el Cañón pueda inyectar los datos al spawnear)
-	UPROPERTY(BlueprintReadWrite, Category = "Projectile | Payload")
-	class UElementalAction_Muzzle* MuzzleAction;
 
-	UPROPERTY(BlueprintReadWrite, Category = "Projectile | Payload")
-	class UElementalAction_Impact* ImpactAction;	
-
-	UPROPERTY(BlueprintReadWrite, Category = "Projectile | Payload")
-	class UElementalDataAsset* ElementalData;
-
-	// Sets default values for this actor's properties
+public:
 	AWeaponProjectile();
 
+	// Función para inyectarle los modificadores al nacer
+	void InitializeProjectilePayload(UElementalAction_Muzzle* InMuzzle, UElementalAction_Impact* InImpact);
+
 protected:
-	// Componentes físicos (Visibles en el editor, protegidos en código)
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Projectile | Components")
-	class USphereComponent* CollisionComp;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	USphereComponent* CollisionComp;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Projectile | Components")
-	class UStaticMeshComponent* ProjectileMesh;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	UStaticMeshComponent* ProjectileMesh;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Projectile | Components")
-	class UProjectileMovementComponent* ProjectileMovement;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Movement")
+	UProjectileMovementComponent* ProjectileMovement;
 
+	// Modificadores elementales
+	UPROPERTY()
+	UElementalAction_Muzzle* MuzzleAction;
+
+	UPROPERTY()
+	UElementalAction_Impact* ImpactAction;
+
+	// Estado interno de penetración (UNA SOLA VEZ)
+	int32 RemainingPierces = 0;
+
+	UPROPERTY()
+	TSet<AActor*> PiercedActors;
+
+	// Para cuando atraviesa enemigos (Overlap)
+	virtual void NotifyActorBeginOverlap(AActor* OtherActor) override;
+
+	// Para cuando choca contra paredes o suelos (Block)
 	virtual void NotifyHit(
-		class UPrimitiveComponent* MyComp,
+		UPrimitiveComponent* MyComp,
 		AActor* Other,
-		class UPrimitiveComponent* OtherComp,
+		UPrimitiveComponent* OtherComp,
 		bool bSelfMoved,
 		FVector HitLocation,
 		FVector HitNormal,
