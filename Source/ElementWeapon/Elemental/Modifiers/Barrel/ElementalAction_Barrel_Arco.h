@@ -13,10 +13,10 @@ class ELEMENTWEAPON_API UElementalAction_Barrel_Arco : public UElementalAction_B
 	GENERATED_BODY()
 
 protected:
-	UPROPERTY(EditAnywhere, Category = "Splitter")
+	UPROPERTY(EditAnywhere, Category = "Arco")
 	int32 ProjectileCount = 3;
 
-	UPROPERTY(EditAnywhere, Category = "Splitter")
+	UPROPERTY(EditAnywhere, Category = "Arco")
 	float SpreadAngle = 30.0f;
 
 	virtual void ExecuteBarrelModifier(class UWeaponBarrelComponent* BarrelComponent) const override;

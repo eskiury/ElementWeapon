@@ -7,7 +7,6 @@
 
 #include "WeaponBarrelComponent.generated.h"
 
-
 UCLASS(Abstract, Blueprintable)
 class ELEMENTWEAPON_API UWeaponBarrelComponent : public UActorComponent, public IWeaponComponentInterface
 {
@@ -26,6 +25,9 @@ public:
 	void FireBarrel();
 
 	void DeliverShot(FVector Location, FRotator Rotation) const;
+
+	FORCEINLINE class UElementalDataAsset* GetInfusedElement() const { return InfusedElement; }
+	void SetInfusedElement(UElementalDataAsset* NewElement) { InfusedElement = NewElement; }
 
 protected:
 	UPROPERTY(BlueprintReadOnly, Category = "Weapon Context")

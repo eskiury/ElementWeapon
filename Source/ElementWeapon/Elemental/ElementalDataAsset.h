@@ -14,7 +14,7 @@
 #include "ElementalDataAsset.generated.h"
 
 
-UCLASS()
+UCLASS(BlueprintType)
 class ELEMENTWEAPON_API UElementalDataAsset : public UDataAsset
 {
 	GENERATED_BODY()

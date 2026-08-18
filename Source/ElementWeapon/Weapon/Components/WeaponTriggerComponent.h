@@ -26,6 +26,7 @@ public:
 	FTimerHandle StreamTimerHandle;
 
 	FORCEINLINE class UElementalDataAsset* GetInfusedElement() const { return InfusedElement; }
+	void SetInfusedElement(UElementalDataAsset* NewElement) { InfusedElement = NewElement; }
 
 protected:
 	//Guardamos la referencia de arma para usarla cuando este componente dispare

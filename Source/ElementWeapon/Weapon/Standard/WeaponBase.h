@@ -1,13 +1,19 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-
 #include "WeaponComponentInterface.h"
 
 #include "WeaponBase.generated.h"
+
+//UENUM(BlueprintType)
+//enum class EWeapoPartSlot: uint8
+//{
+//	Trigger UMETA(DisplayName = "Gatillo"),
+//	Barrel	UMETA(DisplayName = "Cañón"),
+//	Muzzle	UMETA(DisplayName = "Punta")
+//};
+
 
 
 UENUM(BlueprintType)
@@ -28,6 +34,9 @@ public:
 	AWeaponBase();
 
 	void EquipComponent(EWeaponSlot Slot, TSubclassOf<UActorComponent> NewComponentClass);
+
+	UFUNCTION(BlueprintCallable, Category = "Weapon | Elements")
+	void EquipElementToSlot(EWeaponSlot Slot, UElementalDataAsset* NewElement);
 
 	UFUNCTION(BlueprintCallable, Category = "Weapon Actions")
 	void ShotWeapon();

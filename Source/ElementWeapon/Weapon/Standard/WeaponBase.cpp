@@ -81,6 +81,34 @@ void AWeaponBase::EquipComponent(EWeaponSlot Slot, TSubclassOf<UActorComponent> 
 	}
 }
 
+void AWeaponBase::EquipElementToSlot(EWeaponSlot Slot, UElementalDataAsset* NewElement)
+{
+	switch (Slot)
+	{
+	case EWeaponSlot::Trigger:
+		if (CurrentTrigger && NewElement != nullptr)
+		{
+			CurrentTrigger->SetInfusedElement(NewElement);
+			UE_LOG(LogTemp, Log, TEXT("Elemento equipado en el GATILLO"));
+		}
+		break;
+	case EWeaponSlot::Barrel:
+		if (CurrentBarrel && NewElement != nullptr)
+		{
+			CurrentBarrel->SetInfusedElement(NewElement);
+			UE_LOG(LogTemp, Log, TEXT("Elemento equipado en el GATILLO"));
+		}
+		break;
+	case EWeaponSlot::Muzzle:
+		if (CurrentMuzzle && NewElement != nullptr)
+		{
+			CurrentMuzzle->SetInfusedElement(NewElement);
+			UE_LOG(LogTemp, Log, TEXT("Elemento equipado en el GATILLO"));
+		}
+		break;
+	}
+}
+
 void AWeaponBase::ShotWeapon()
 {
 	if (CurrentTrigger != nullptr)
@@ -96,8 +124,6 @@ void AWeaponBase::StopShooting()
 		CurrentTrigger->ReleaseTrigger();
 	}
 }
-
-
 
 void AWeaponBase::BeginPlay()
 {

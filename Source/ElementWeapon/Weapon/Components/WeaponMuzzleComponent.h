@@ -17,6 +17,7 @@ public:
 	virtual void InitializeComponentContext(class AWeaponBase* Weapon) override;
 
 	FORCEINLINE class UElementalDataAsset* GetInfusedElement() const { return InfusedElement; }
+	void SetInfusedElement(UElementalDataAsset* NewElement) { InfusedElement = NewElement; }
 
 protected:
 	UPROPERTY(BlueprintReadOnly, Category = "Weapon Context")
