@@ -16,16 +16,12 @@ class ELEMENTWEAPON_API UElementalAction_Barrel_Splitter : public UElementalActi
 
 protected:
 	UPROPERTY(EditAnywhere, Category = "Splitter")
-	int32 ProjectileCount = 10;
+	int32 NumberOfPellets = 10;
 
 	UPROPERTY(EditAnywhere, Category = "Splitter")
 	float SpreadAngle = 30.0f;
 
-	virtual void ExecuteBarrelModifier(class UWeaponBarrelComponent* BarrelComponent) const override;
+	virtual void ExecuteBarrelModifier(class UWeaponBarrelComponent* BarrelComponent, const FVector& BaseLocation, const FRotator& BaseRotation) const override;
 
-	FActorSpawnParameters SpawnParams;
-
-	UPROPERTY(EditDefaultsOnly)
-	TSubclassOf<AActor> ProjectileClass;
-	
+	FActorSpawnParameters SpawnParams;	
 };

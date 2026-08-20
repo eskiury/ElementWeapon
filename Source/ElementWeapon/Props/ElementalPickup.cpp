@@ -5,6 +5,7 @@
 #include "GameFramework/RotatingMovementComponent.h"
 #include "GameFramework/Character.h"
 #include "../Weapon/Interfaces/ElementSelectionInterface.h"
+#include "../Elemental/ElementalDataAsset.h"
 
 // Sets default values
 AElementalPickup::AElementalPickup()
@@ -18,6 +19,7 @@ AElementalPickup::AElementalPickup()
 	StaticMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("ElementMesh"));
 	StaticMesh->SetupAttachment(CollisionComp);
 	StaticMesh->SetCollisionProfileName(TEXT("NoCollision"));
+	//StaticMesh->SetRelativeScale3D({ 2.0f, 2.0f, 2.0f });
 
 	RotatorComponent = CreateDefaultSubobject<URotatingMovementComponent>(TEXT("RotatorComp"));
 	RotatorComponent->RotationRate = FRotator(0.0f, 90.0f, 0.0f); // Gira en Yaw
@@ -27,7 +29,8 @@ AElementalPickup::AElementalPickup()
 void AElementalPickup::BeginPlay()
 {
 	Super::BeginPlay();
-	
+	if (ElementData->WeaponStaticMesh == nullptr) return;
+	StaticMesh->SetStaticMesh(ElementData->WeaponStaticMesh);
 }
 
 void AElementalPickup::NotifyActorBeginOverlap(AActor* OtherActor)

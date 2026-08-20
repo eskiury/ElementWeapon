@@ -1,5 +1,8 @@
 #include "WeaponBarrelComponent.h"
 
+#include "Kismet/GameplayStatics.h"
+
+
 #include "../../Elemental/ElementalDataAsset.h"
 #include "../Standard/WeaponBase.h"
 #include "../../Elemental/Modifiers/Impact/ElementalAction_Impact_Pierce.h"
@@ -23,43 +26,27 @@ void UWeaponBarrelComponent::InitializeComponentContext(AWeaponBase* Weapon)
 
 void UWeaponBarrelComponent::FireBarrel()
 {
-	//¿Tenemos elemento y acción geométrica en el cañón?
+	// 1. Calculamos la posición real del Muzzle y la rotación convergente a la cruceta
+	FVector SpawnLocation = FVector::ZeroVector;
+	FRotator SpawnRotation = FRotator::ZeroRotator;
+
+	if (!GetShootTransform(SpawnLocation, SpawnRotation))
+	{
+		return;
+	}
+
+	// 2. Si hay modificador de cañón, le pasamos la posición y rotación base calculadas
 	if (InfusedElement != nullptr && InfusedElement->BarrelAction != nullptr)
 	{
-		//SÍ: Le cedemos el control al Splitter (él se encargará de llamar al spawn del proyectil
-		//ShootingMode = InfusedElement->BarrelAction->GetShootingMode();
-		InfusedElement->BarrelAction->ExecuteBarrelModifier(this);
-		
+		InfusedElement->BarrelAction->ExecuteBarrelModifier(this, SpawnLocation, SpawnRotation);
 	}
 	else
 	{
-		//NO: Disparo limpio por defecto (Una sola bala recta)
-		//Calculamos la posición y rotación actual del arma para el disparo estándar
-		FVector SpawnLocation = GetOwner()->GetActorLocation();
-		//FRotator SpawnRotation = GetOwner()->GetActorRotation();
-
-
-		APawn* PlayerPawn = Cast<APawn>(MyWeaponOwner->GetOwner());
-		FRotator SpawnRotation = FRotator::ZeroRotator;
-
-		if (PlayerPawn && PlayerPawn->GetController())
-		{
-			// GetControlRotation() nos da exactamente el vector de mirada de la cámara del jugador
-			SpawnRotation = PlayerPawn->GetController()->GetControlRotation();
-		}
-		else
-		{
-			// Si no hay jugador (ej: una torreta aliada), usamos la del arma por defecto
-			SpawnRotation = GetOwner()->GetActorRotation();
-		}
-
-		//Llamamos a tu spawner físico para lanzar la bala única
-		//ShootingMode = ShotingMode::Projectile;
+		// Disparo limpio sin modificador
 		DeliverShot(SpawnLocation, SpawnRotation);
-		//UE_LOG(LogTemp, Log, TEXT("Spawn Projectile	"));
-
 	}
 }
+
 void UWeaponBarrelComponent::DeliverShot(FVector Location, FRotator Rotation) const
 {
 	//InfusedElement->BarrelAction
@@ -90,6 +77,96 @@ void UWeaponBarrelComponent::DeliverShot(FVector Location, FRotator Rotation) co
 		ExecuteProjectileShot(Location, Rotation);
 		break;
 	}
+}
+
+bool UWeaponBarrelComponent::GetShootTransform(FVector& OutMuzzleLocation, FRotator& OutAimRotation) const
+{
+	UWorld* World = GetWorld();
+	if (!World || !GetOwner()) return false;
+
+	// 1. Origen por defecto (Fallback)
+	OutMuzzleLocation = GetOwner()->GetActorLocation();
+	bool bFoundSocket = false;
+
+	// 2. Buscar el socket en SkeletalMesh o StaticMesh
+	if (USkeletalMeshComponent* WeaponSkelMesh = GetOwner()->FindComponentByClass<USkeletalMeshComponent>())
+	{
+		// Comprueba si tu socket se llama "Muzzle" o "MuzzleSocket" en el Editor
+		if (WeaponSkelMesh->DoesSocketExist(TEXT("MuzzleSocket")))
+		{
+			OutMuzzleLocation = WeaponSkelMesh->GetSocketLocation(TEXT("MuzzleSocket"));
+			bFoundSocket = true;
+		}
+		else if (WeaponSkelMesh->DoesSocketExist(TEXT("Muzzle")))
+		{
+			OutMuzzleLocation = WeaponSkelMesh->GetSocketLocation(TEXT("Muzzle"));
+			bFoundSocket = true;
+		}
+	}
+	else if (UStaticMeshComponent* WeaponStaticMesh = GetOwner()->FindComponentByClass<UStaticMeshComponent>())
+	{
+		if (WeaponStaticMesh->DoesSocketExist(TEXT("MuzzleSocket")))
+		{
+			OutMuzzleLocation = WeaponStaticMesh->GetSocketLocation(TEXT("MuzzleSocket"));
+			bFoundSocket = true;
+		}
+		else if (WeaponStaticMesh->DoesSocketExist(TEXT("Muzzle")))
+		{
+			OutMuzzleLocation = WeaponStaticMesh->GetSocketLocation(TEXT("Muzzle"));
+			bFoundSocket = true;
+		}
+	}
+
+	if (!bFoundSocket)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("[GetShootTransform] NO se encontró el socket. Usando posición base del Actor!"));
+	}
+
+	// 3. Obtener la cámara del jugador
+	APlayerCameraManager* CamManager = UGameplayStatics::GetPlayerCameraManager(World, 0);
+	if (!CamManager) return false;
+
+	FVector CamLocation = CamManager->GetCameraLocation();
+	FVector CamForward = CamManager->GetActorForwardVector();
+
+	float MaxAimDistance = 10000.0f;
+	FVector CamTraceEnd = CamLocation + (CamForward * MaxAimDistance);
+
+	FCollisionQueryParams CamTraceParams;
+	CamTraceParams.AddIgnoredActor(GetOwner());
+	if (GetOwner()->GetOwner())
+	{
+		CamTraceParams.AddIgnoredActor(GetOwner()->GetOwner());
+	}
+
+	FHitResult CamHit;
+	bool bHit = World->LineTraceSingleByChannel(
+		CamHit,
+		CamLocation,
+		CamTraceEnd,
+		ECC_Visibility,
+		CamTraceParams
+	);
+
+	FVector TargetPoint = bHit ? CamHit.ImpactPoint : CamTraceEnd;
+
+	// 4. Calcular dirección y rotación
+	FVector ShootDirection = (TargetPoint - OutMuzzleLocation).GetSafeNormal();
+	OutAimRotation = ShootDirection.Rotation();
+
+	// -------------------------------------------------------------
+	// 🔍 DEBUG VISUAL (Dura 2 segundos en pantalla al disparar)
+	// -------------------------------------------------------------
+	// 🟣 Esfera Magenta: Dónde cree el código que está la punta del cañón
+	//DrawDebugSphere(World, OutMuzzleLocation, 6.0f, 8, FColor::Magenta, false, 2.0f, 0, 1.0f);
+
+	// 🟡 Esfera Amarilla: Dónde apunta tu cruceta (Impacto de la cámara)
+	//DrawDebugSphere(World, TargetPoint, 10.0f, 8, FColor::Yellow, false, 2.0f, 0, 1.0f);
+
+	// 🟢 Línea Verde: Trayectoria real que unirá la boca del arma con el objetivo
+	//DrawDebugLine(World, OutMuzzleLocation, TargetPoint, FColor::Green, false, 2.0f, 0, 1.5f);
+
+	return true;
 }
 
 void UWeaponBarrelComponent::ExecuteProjectileShot(FVector Location, FRotator Rotation) const

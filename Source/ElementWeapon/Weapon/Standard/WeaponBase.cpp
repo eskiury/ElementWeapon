@@ -1,5 +1,9 @@
 #include "WeaponBase.h"
 
+#include "Kismet/GameplayStatics.h"
+#include "GameFramework/Character.h"
+#include "Camera/CameraComponent.h"
+
 #include"../Components/WeaponTriggerComponent.h"
 #include"../Components/WeaponBarrelComponent.h"
 #include"../Components/WeaponMuzzleComponent.h"
@@ -11,7 +15,11 @@
 AWeaponBase::AWeaponBase()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bCanEverTick = false;
+
+	SkeletalGun = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("SkeletalGun"));
+	SetRootComponent(SkeletalGun);
+
 
 }
 
@@ -133,8 +141,25 @@ void AWeaponBase::BeginPlay()
 	EquipComponent(EWeaponSlot::Trigger, DefaultTriggerClass);
 	EquipComponent(EWeaponSlot::Barrel, DefaultBarrelClass);
 	EquipComponent(EWeaponSlot::Muzzle, DefaultMuzzleClass);
+	
+	ACharacter* FP1 = Cast<ACharacter>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
 
+	if (!FP1) return;
+	
+	SetOwner(FP1);
+	
+	UCameraComponent* PlayerCamera = FP1->FindComponentByClass<UCameraComponent>();
+	if (PlayerCamera)
+	{
+		AttachToComponent(
+			PlayerCamera,
+			FAttachmentTransformRules::SnapToTargetNotIncludingScale
+		);
 
+		//Offset Relativo
+		SetActorRelativeLocation(FVector(40.0f, 20.0f, -20.0f));
+		SetActorRelativeRotation(FRotator(0.0f, 0.0f, 0.0f));
+	}
 }
 
 void AWeaponBase::ShotBarrel() const

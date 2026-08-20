@@ -21,10 +21,10 @@ class ELEMENTWEAPON_API UElementalDataAsset : public UDataAsset
 
 public:
 	// Reemplazas la antigua variable por estas dos:
-	UPROPERTY(EditDefaultsOnly, Instanced, Category = "Trigger Modifiers")
+	UPROPERTY(EditDefaultsOnly, Instanced, Category = "Modificadores Gatillo")
 	class UElementalAction_FireMode* FireModeAction;
 
-	UPROPERTY(EditDefaultsOnly, Instanced, Category = "Trigger Modifiers")
+	UPROPERTY(EditDefaultsOnly, Instanced, Category = "Modificadores Gatillo")
 	class UElementalAction_Impact* ImpactAction;
 
 	UPROPERTY(EditAnywhere, Instanced, Category = "Cañon")
@@ -32,4 +32,9 @@ public:
 
 	UPROPERTY(EditAnywhere, Instanced, Category = "Punta")
 	class UElementalAction_Muzzle* MuzzleAction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Visuals")
+	TObjectPtr<UStaticMesh> WeaponStaticMesh;
+
+
 };

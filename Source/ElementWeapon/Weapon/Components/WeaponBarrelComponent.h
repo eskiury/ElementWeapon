@@ -29,6 +29,8 @@ public:
 	FORCEINLINE class UElementalDataAsset* GetInfusedElement() const { return InfusedElement; }
 	void SetInfusedElement(UElementalDataAsset* NewElement) { InfusedElement = NewElement; }
 
+	bool GetShootTransform(FVector& OutMuzzleLocation, FRotator& OutAimRotation) const;
+
 protected:
 	UPROPERTY(BlueprintReadOnly, Category = "Weapon Context")
 	class AWeaponBase* MyWeaponOwner;

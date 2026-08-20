@@ -2,25 +2,11 @@
 
 #include "../../../Weapon/Components/WeaponBarrelComponent.h"
 
-void UElementalAction_Barrel_Arco::ExecuteBarrelModifier(UWeaponBarrelComponent* BarrelComponent) const
+void UElementalAction_Barrel_Arco::ExecuteBarrelModifier(class UWeaponBarrelComponent* BarrelComponent, const FVector& BaseLocation, const FRotator& BaseRotation) const
 {
 	if (BarrelComponent == nullptr || BarrelComponent->GetOwner() == nullptr) return;
 
 	APawn* PlayerPawn = Cast<APawn>(BarrelComponent->GetOwner()->GetOwner());
-	FRotator Rotacion = FRotator::ZeroRotator;
-
-	if (PlayerPawn && PlayerPawn->GetController())
-	{
-		// GetControlRotation() nos da exactamente el vector de mirada de la cámara del jugador
-		Rotacion = PlayerPawn->GetController()->GetControlRotation();
-	}
-	else
-	{
-		// Si no hay jugador (ej: una torreta aliada), usamos la del arma por defecto
-		Rotacion = BarrelComponent->GetOwner()->GetActorRotation();
-	}
-
-	FVector Location = BarrelComponent->GetOwner()->GetActorLocation();
 
 	float paso = 0.0f;
 	if (ProjectileCount > 1)
@@ -33,7 +19,7 @@ void UElementalAction_Barrel_Arco::ExecuteBarrelModifier(UWeaponBarrelComponent*
 	for (int i = 0; i < ProjectileCount; ++i)
 	{
 		Yaw = (i * paso) + Adjustment;
-		BarrelComponent->DeliverShot(Location, Rotacion + FRotator(0.0f, Yaw, 0.0f));
+		BarrelComponent->DeliverShot(BaseLocation, BaseRotation + FRotator(0.0f, Yaw, 0.0f));
 
 	}
 }

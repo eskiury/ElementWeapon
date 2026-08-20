@@ -6,16 +6,6 @@
 
 #include "WeaponBase.generated.h"
 
-//UENUM(BlueprintType)
-//enum class EWeapoPartSlot: uint8
-//{
-//	Trigger UMETA(DisplayName = "Gatillo"),
-//	Barrel	UMETA(DisplayName = "Cañón"),
-//	Muzzle	UMETA(DisplayName = "Punta")
-//};
-
-
-
 UENUM(BlueprintType)
 enum class EWeaponSlot : uint8
 {
@@ -45,6 +35,7 @@ public:
 	void StopShooting();
 
 
+
 	//Getter del cañon
 	FORCEINLINE class UWeaponBarrelComponent* GetCurrentBarrel() const { return CurrentBarrel; }
 
@@ -59,6 +50,8 @@ public:
 
 private:
 	void BeginPlay();
+
+
 
 	UPROPERTY(Transient, VisibleAnywhere, Category = "Weapon Components")
 	class UWeaponTriggerComponent* CurrentTrigger;
@@ -78,5 +71,8 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, Category = "WeaponSetup")
 	TSubclassOf<class UWeaponMuzzleComponent> DefaultMuzzleClass;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Mesh")
+	USkeletalMeshComponent* SkeletalGun;
 
 };

@@ -27,7 +27,7 @@ protected:
 
 public:
 	// El contrato que ejecutará el Gatillo cuando el jugador dispare
-	virtual void ExecuteBarrelModifier(class UWeaponBarrelComponent* BarrelComponent) const{}
+	virtual void ExecuteBarrelModifier(class UWeaponBarrelComponent* BarrelComponent, const FVector& BaseLocation, const FRotator& BaseRotation) const{}
 
 	ShotingMode GetShootingMode() { return ShotMode; }
 };

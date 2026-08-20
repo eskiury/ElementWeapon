@@ -19,10 +19,7 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Arco")
 	float SpreadAngle = 30.0f;
 
-	virtual void ExecuteBarrelModifier(class UWeaponBarrelComponent* BarrelComponent) const override;
+	virtual void ExecuteBarrelModifier(class UWeaponBarrelComponent* BarrelComponent, const FVector& BaseLocation, const FRotator& BaseRotation) const;
 
 	FActorSpawnParameters SpawnParams;
-
-	UPROPERTY(EditDefaultsOnly)
-	TSubclassOf<AActor> ProjectileClass;
 };

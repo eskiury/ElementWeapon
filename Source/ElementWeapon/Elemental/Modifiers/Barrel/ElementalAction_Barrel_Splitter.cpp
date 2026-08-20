@@ -2,33 +2,19 @@
 
 #include "../../../Weapon/Components/WeaponBarrelComponent.h"
 
-void UElementalAction_Barrel_Splitter::ExecuteBarrelModifier(UWeaponBarrelComponent* BarrelComponent) const
+void UElementalAction_Barrel_Splitter::ExecuteBarrelModifier(UWeaponBarrelComponent* Barrel, const FVector& BaseLocation, const FRotator& BaseRotation) const
 {
-	if (BarrelComponent == nullptr || BarrelComponent->GetOwner() == nullptr) return;
+	if (!Barrel) return;
 
-
-	APawn* PlayerPawn = Cast<APawn>(BarrelComponent->GetOwner()->GetOwner());
-	FRotator Rotacion = FRotator::ZeroRotator;
-
-	if (PlayerPawn && PlayerPawn->GetController())
+	// Ejemplo de escopeta / división:
+	// Mantenemos BaseLocation intacto (siempre la punta del Muzzle)
+	// y alteramos únicamente la rotación para cada proyectil
+	for (int32 i = 0; i < NumberOfPellets; ++i)
 	{
-		// GetControlRotation() nos da exactamente el vector de mirada de la cámara del jugador
-		Rotacion = PlayerPawn->GetController()->GetControlRotation();
-	}
-	else
-	{
-		// Si no hay jugador (ej: una torreta aliada), usamos la del arma por defecto
-		Rotacion = BarrelComponent->GetOwner()->GetActorRotation();
-	}
+		FRotator SpreadRotation = BaseRotation;
+		SpreadRotation.Yaw += FMath::RandRange(-SpreadAngle, SpreadAngle);
+		SpreadRotation.Pitch += FMath::RandRange(-SpreadAngle, SpreadAngle);
 
-	FVector Location = BarrelComponent->GetOwner()->GetActorLocation();
-	//FRotator Rotacion = BarrelComponent->GetOwner()->GetActorRotation();
-
-	//Enviamos el comando de Spawnear al WeaponBarrelComponent con la rotacion alterada y un numero X de veces.
-	for (int i = 0; i < ProjectileCount; i++)
-	{			
-		//Rotacion + FRotator(FMath::RandRange(-SpreadAngle, SpreadAngle), FMath::RandRange(-SpreadAngle, SpreadAngle), 0.0f)
-		//Suma del Rotator Main, mas los dos Randoms, pero ahorramos memoria que esto se repite mucho.
-		BarrelComponent->DeliverShot(Location, Rotacion + FRotator(FMath::RandRange(-SpreadAngle, SpreadAngle), FMath::RandRange(-SpreadAngle, SpreadAngle), 0.0f));
+		Barrel->DeliverShot(BaseLocation, SpreadRotation);
 	}
 }
